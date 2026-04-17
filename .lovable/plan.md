@@ -1,74 +1,62 @@
+# Seat Layout di Atas Denah Mobil
 
-# Traveloka Clone — UI/UX Showcase (Web + Mobile-first)
+## Tujuan
 
-Aplikasi cloning Traveloka dengan 3 modul (Hotel, Shuttle, Ride) yang **modular** sehingga mudah dikembangkan. Mode tampilan **otomatis berdasarkan device** (responsive breakpoint), pakai **mock data**, dan peta **Leaflet + OpenStreetMap**.
+Mengganti grid kursi datar di `ShuttleBooking.tsx` (step "seat") menjadi seat layout yang **di-overlay di atas gambar denah mobil** (top-view, mirip image base HiAce yang diupload), sehingga user melihat posisi kursi sesuai layout kendaraan asli (sopir, pintu, lorong, baris).
 
-## Arsitektur Modular
+## Aset Gambar
 
+- Copy `user-uploads://BASE_HIACE.png` → `src/assets/shuttle/base-hiace.png` (top-view HiAce kosong)
+- Siapkan layout default untuk kendaraan lain (Elf, Premio) — fallback ke base HiAce dulu, bisa ditambah aset baru nanti.
+
+## Konfigurasi Layout per Kendaraan
+
+Buat file baru `src/modules/shuttle/data/seatLayouts.ts` berisi mapping vehicle → konfigurasi:
+
+```ts
+{
+  image: hiaceImg,
+  aspect: "1/2.2",         // rasio gambar
+  driverSeat: { x%, y% },  // posisi sopir (non-clickable, ikon stir)
+  seats: [
+    { num: 1, x: 25, y: 30 },  // posisi % terhadap container
+    { num: 2, x: 60, y: 30 },
+    ...
+  ]
+}
 ```
-src/
-├── modules/
-│   ├── hotel/      (pages, components, mock data, types)
-│   ├── shuttle/    (pages, components, mock data, types)
-│   └── ride/       (pages, components, mock data, types)
-├── shared/
-│   ├── layouts/    (WebLayout, MobileLayout, ResponsiveLayout)
-│   ├── components/ (Header, BottomNav, ModuleCard, SearchBar)
-│   └── hooks/      (useIsMobile)
-└── pages/          (Home, NotFound)
-```
 
-Setiap modul self-contained → menambah modul baru (Flight, Train, dll) cukup buat folder baru + daftarkan di route & home grid.
+- HiAce 14 kursi: 1 sopir + 1 depan, lalu baris 2-2 (lorong tengah), baris belakang 4
+- Elf 11 kursi: variasi posisi
+- Premio 9 kursi: variasi posisi
+- Posisi pakai persen agar responsive
 
-## Desain Visual (Mirip Traveloka)
+## Komponen Baru: `SeatMap.tsx`
 
-- **Primary**: biru Traveloka `#0194F3`, accent orange `#FF5E1F`
-- **Card** putih dengan shadow lembut, border-radius medium
-- **Ikon kategori** warna-warni per modul (hotel = biru, shuttle = hijau, ride = orange)
-- Tipografi: Inter, body 14–16px
-- Semua token dimasukkan ke `index.css` & `tailwind.config.ts` (HSL)
+`src/modules/shuttle/components/SeatMap.tsx`
 
-## Layout Responsive (auto switch)
+- Props: `vehicle`, `totalSeats`, `occupied: Set<number>`, `selected: number[]`, `onToggle(n)`, `maxSelect`
+- Render:
+  - Container `relative` dengan `aspect-ratio` & background image denah mobil (object-contain)
+  - Ikon stir di posisi sopir (Lucide `Disc3` / steering-wheel SVG)
+  - Tombol kursi `absolute` per koordinat — bulat, ukuran `~10%` lebar container
+  - State warna: tersedia (outline primary), dipilih (filled primary + nomor putih), terisi (abu + ikon User), sopir (kuning, disabled)
+- Legend di bawah gambar (Tersedia / Dipilih / Terisi)
 
-- **≥768px → Web Mode**: top nav horizontal, hero banner besar, search panel multi-kolom, grid produk
-- **<768px → Mobile Mode**: header ringkas + search bar, modul grid 4 kolom ikon, bottom navigation (Home / Booking / Promo / Account), bottom sheet untuk filter
+## Update `ShuttleBooking.tsx`
 
-## Halaman Beranda
+- Import `SeatMap` dan `getSeatLayout(vehicle)`
+- Ganti blok `<div className="grid grid-cols-5 ...">` (baris ~99-126) dengan `<SeatMap ... />`
+- Container kursi diberi background `bg-muted/30` + padding agar gambar denah terlihat jelas
+- Sisanya (pickup/dropoff, ringkasan, step form & success) tetap
 
-- Hero banner + search bar kontekstual
-- **Grid 3 modul** (Hotel, Shuttle, Ride) dengan ikon ala Traveloka
-- Section "Promo Spesial" & "Rekomendasi" (mock)
+## Hasil Visual
 
-## Modul 1 — Hotel
+User melihat sketsa mobil top-view dengan tombol kursi bernomor yang ditempatkan presisi di atas denah, mengklik untuk memilih sebanyak `pax`. Pengalaman jauh lebih realistis dibanding grid datar.
 
-1. **Search**: kota, check-in/out (date picker), jumlah tamu & kamar
-2. **Hasil pencarian**: list/grid hotel dengan foto, rating bintang, harga/malam, fasilitas, filter (harga, bintang, fasilitas) di sidebar (web) / bottom sheet (mobile)
-3. **Detail hotel**: galeri foto, deskripsi, fasilitas, peta lokasi mini (Leaflet), pilih tipe kamar
-4. **Booking form** (mock): data tamu → halaman konfirmasi sukses
+## Files yang akan diubah/dibuat
 
-## Modul 2 — Shuttle
-
-1. **Search**: kota asal → kota tujuan (swap button), tanggal, jumlah penumpang
-2. **Hasil**: daftar jadwal shuttle (operator, jam berangkat–tiba, durasi, harga, kursi tersisa), filter waktu & operator
-3. **Detail**: pilih kursi (seat map sederhana), pilih titik jemput/antar
-4. **Booking form** (mock) → konfirmasi e-ticket
-
-## Modul 3 — Ride (Hailing dengan Map)
-
-1. **Map fullscreen** Leaflet + OSM, marker posisi user
-2. **Bottom sheet**: input "Jemput di" & "Tujuan" (autocomplete mock kota/POI)
-3. Pilih jenis kendaraan (Bike, Car, XL) dengan estimasi harga & ETA
-4. **Simulasi cari driver** (loading) → kartu driver muncul (nama, plat, rating, foto) + marker driver bergerak ke titik jemput (animasi sederhana)
-5. Status trip: menuju penjemputan → dalam perjalanan → selesai (mock)
-
-## Tech & Library
-
-- React + Vite + TS + Tailwind + shadcn/ui (existing)
-- **react-leaflet + leaflet** untuk peta
-- **date-fns** untuk handling tanggal
-- React Router untuk routing per modul (`/hotel`, `/shuttle`, `/ride`)
-- Mock data di tiap modul (`modules/<name>/data/*.ts`)
-
-## Hasil Akhir
-
-User membuka aplikasi → otomatis dapat tampilan Web atau Mobile sesuai device → bisa menjelajah 3 modul lengkap dengan flow search → list → detail → booking confirmation (mock), plus pengalaman peta nyata di modul Ride.
+- create: `src/assets/shuttle/base-hiace.png` (copy dari upload)
+- create: `src/modules/shuttle/data/seatLayouts.ts`
+- create: `src/modules/shuttle/components/SeatMap.tsx`
+- edit: `src/modules/shuttle/pages/ShuttleBooking.tsx`
