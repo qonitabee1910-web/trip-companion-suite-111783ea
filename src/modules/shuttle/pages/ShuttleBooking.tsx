@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, User } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { SeatMap } from "../components/SeatMap";
 
 const ShuttleBooking = () => {
   const { id } = useParams();
@@ -93,42 +94,15 @@ const ShuttleBooking = () => {
         <div className="space-y-4">
           <Card className="p-4">
             <h2 className="font-semibold mb-3">Pilih Kursi ({selectedSeats.length}/{pax})</h2>
-            <div className="bg-muted/50 rounded-lg p-4">
-              <div className="text-xs text-center text-muted-foreground mb-3">Depan (Sopir)</div>
-              <div className="grid grid-cols-5 gap-2 max-w-xs mx-auto">
-                {Array.from({ length: totalSeats }).map((_, i) => {
-                  const num = i + 1;
-                  const isOccupied = occupiedSeats.has(num);
-                  const isSelected = selectedSeats.includes(num);
-                  // insert aisle gap at column 3
-                  const col = i % 4;
-                  return (
-                    <button
-                      key={num}
-                      onClick={() => toggleSeat(num)}
-                      disabled={isOccupied}
-                      className={`aspect-square rounded text-xs font-medium border-2 transition-colors ${
-                        col === 2 ? "col-start-4" : ""
-                      } ${
-                        isOccupied
-                          ? "bg-muted text-muted-foreground border-muted cursor-not-allowed"
-                          : isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-card border-primary/30 hover:border-primary"
-                      }`}
-                      style={col === 2 ? { gridColumnStart: 4 } : undefined}
-                    >
-                      {isOccupied ? <User className="h-3 w-3 mx-auto" /> : num}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex justify-center gap-4 mt-4 text-xs">
-                <div className="flex items-center gap-1"><div className="h-3 w-3 rounded border-2 border-primary/30 bg-card" />Tersedia</div>
-                <div className="flex items-center gap-1"><div className="h-3 w-3 rounded bg-primary" />Dipilih</div>
-                <div className="flex items-center gap-1"><div className="h-3 w-3 rounded bg-muted" />Terisi</div>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground text-center mb-3">{shuttle.vehicle}</p>
+            <SeatMap
+              vehicle={shuttle.vehicle}
+              totalSeats={totalSeats}
+              occupied={occupiedSeats}
+              selected={selectedSeats}
+              maxSelect={pax}
+              onToggle={toggleSeat}
+            />
           </Card>
 
           <Card className="p-4 space-y-3">
