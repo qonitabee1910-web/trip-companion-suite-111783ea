@@ -14,7 +14,7 @@ export interface SeatLayoutConfig {
 }
 
 // HiAce 14 seats: 1 driver (non-clickable) + front passenger 1, then rows of 2-2 with center aisle, last row of 4
-const HIACE_LAYOUT: SeatLayoutConfig = {
+export const HIACE_LAYOUT: SeatLayoutConfig = {
   image: hiaceImg,
   aspect: "1/2.2",
   driverSeat: { x: 68, y: 14 },
@@ -41,7 +41,7 @@ const HIACE_LAYOUT: SeatLayoutConfig = {
   ],
 };
 
-const ELF_LAYOUT: SeatLayoutConfig = {
+export const ELF_LAYOUT: SeatLayoutConfig = {
   image: hiaceImg,
   aspect: "1/2.2",
   driverSeat: { x: 68, y: 14 },
@@ -60,7 +60,7 @@ const ELF_LAYOUT: SeatLayoutConfig = {
   ],
 };
 
-const PREMIO_LAYOUT: SeatLayoutConfig = {
+export const PREMIO_LAYOUT: SeatLayoutConfig = {
   image: hiaceImg,
   aspect: "1/2.2",
   driverSeat: { x: 68, y: 16 },

@@ -14,6 +14,7 @@ import HotelBooking from "./modules/hotel/pages/HotelBooking";
 import ShuttleHome from "./modules/shuttle/pages/ShuttleHome";
 import ShuttleSearch from "./modules/shuttle/pages/ShuttleSearch";
 import ShuttleBooking from "./modules/shuttle/pages/ShuttleBooking";
+import SeatLayoutEditor from "./modules/shuttle/pages/SeatLayoutEditor";
 
 import RideHome from "./modules/ride/pages/RideHome";
 
@@ -35,6 +36,7 @@ const App = () => (
 
           <Route path="/shuttle" element={<ShuttleHome />} />
           <Route path="/shuttle/search" element={<ShuttleSearch />} />
+          <Route path="/shuttle/seat-editor" element={<SeatLayoutEditor />} />
           <Route path="/shuttle/:id/book" element={<ShuttleBooking />} />
 
           <Route path="/ride" element={<RideHome />} />
