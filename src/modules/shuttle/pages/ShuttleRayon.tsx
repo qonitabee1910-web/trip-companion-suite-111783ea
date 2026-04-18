@@ -1,0 +1,129 @@
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DEPART_TIMES, DESTINATION, getRayon } from "../data/rayons";
+import { MapPin, Plane, Users, Minus, Plus, Clock } from "lucide-react";
+
+const ShuttleRayon = () => {
+  const { id = "A" } = useParams();
+  const navigate = useNavigate();
+  const rayon = getRayon(id);
+  const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
+  const [time, setTime] = useState(DEPART_TIMES[1]);
+  const [pax, setPax] = useState(1);
+
+  if (!rayon) {
+    return (
+      <ResponsiveLayout mobileTitle="Rayon" mobileBack="/shuttle">
+        <div className="container py-10 text-center text-muted-foreground">Rayon tidak ditemukan.</div>
+      </ResponsiveLayout>
+    );
+  }
+
+  const handleNext = () => {
+    const params = new URLSearchParams({ rayon: rayon.id, pickup, time, pax: String(pax) });
+    navigate(`/shuttle/service?${params.toString()}`);
+  };
+
+  return (
+    <ResponsiveLayout
+      mobileTitle={`${rayon.name} → KNO`}
+      mobileBack="/shuttle"
+      mobileSubtitle={rayon.area}
+      hideBottomNav
+      mobileHeaderVariant="plain"
+    >
+      <div className="container max-w-2xl py-4 md:py-8 px-3 md:px-6 space-y-4">
+        <Card className="p-4 md:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <Badge variant="secondary" className="mb-1">{rayon.name}</Badge>
+              <h2 className="font-bold text-lg">{rayon.area}</h2>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Tujuan</p>
+              <div className="flex items-center gap-1.5 font-semibold">
+                <Plane className="h-4 w-4 text-accent" />
+                {DESTINATION.short}
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" /> Estimasi tempuh ±{rayon.estimateMin} menit
+          </p>
+        </Card>
+
+        <Card className="p-4 md:p-5 space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" /> Titik Jemput
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {rayon.pickupPoints.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPickup(p)}
+                  className={`px-3 py-2 rounded-full text-sm border-2 transition-all ${
+                    pickup === p
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" /> Jam Berangkat
+            </h3>
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+              {DEPART_TIMES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTime(t)}
+                  className={`py-2 rounded-md text-sm font-medium border-2 transition-all ${
+                    time === t
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" /> Jumlah Penumpang
+            </h3>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="icon" onClick={() => setPax(Math.max(1, pax - 1))}>
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="w-10 text-center text-lg font-bold">{pax}</span>
+              <Button variant="outline" size="icon" onClick={() => setPax(Math.min(12, pax + 1))}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Button
+          onClick={handleNext}
+          className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+        >
+          Lihat Pilihan Service
+        </Button>
+      </div>
+    </ResponsiveLayout>
+  );
+};
+
+export default ShuttleRayon;
