@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -20,30 +21,67 @@ import {
   HIACE_LAYOUT,
   ELF_LAYOUT,
   PREMIO_LAYOUT,
+  saveLayoutToStorage,
+  loadLayoutFromStorage,
+  clearLayoutFromStorage,
+  hasStoredLayout,
   type SeatLayoutConfig,
   type SeatPosition,
+  type VehicleKey,
 } from "../data/seatLayouts";
 
-const PRESETS: Record<string, SeatLayoutConfig> = {
+const PRESETS: Record<VehicleKey, SeatLayoutConfig> = {
   HIACE: HIACE_LAYOUT,
   ELF: ELF_LAYOUT,
   PREMIO: PREMIO_LAYOUT,
 };
 
 export default function SeatLayoutEditor() {
-  const [vehicleKey, setVehicleKey] = useState<keyof typeof PRESETS>("HIACE");
-  const [config, setConfig] = useState<SeatLayoutConfig>({ ...PRESETS.HIACE, seats: [...PRESETS.HIACE.seats] });
+  const [vehicleKey, setVehicleKey] = useState<VehicleKey>("HIACE");
+  const [config, setConfig] = useState<SeatLayoutConfig>(() => {
+    const stored = loadLayoutFromStorage("HIACE");
+    const base = stored || PRESETS.HIACE;
+    return { ...base, seats: base.seats.map((s) => ({ ...s })) };
+  });
   const [selectedNum, setSelectedNum] = useState<number | null>(null);
   const [snap, setSnap] = useState(false);
   const [customImage, setCustomImage] = useState<string | null>(null);
+  const [hasSaved, setHasSaved] = useState(() => hasStoredLayout("HIACE"));
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const loadPreset = (key: keyof typeof PRESETS) => {
+  const loadPreset = (key: VehicleKey) => {
     setVehicleKey(key);
-    const p = PRESETS[key];
+    const stored = loadLayoutFromStorage(key);
+    const base = stored || PRESETS[key];
+    setConfig({ ...base, seats: base.seats.map((s) => ({ ...s })) });
+    const isCustomImg = !!stored?.image && stored.image !== PRESETS[key].image;
+    setCustomImage(isCustomImg ? stored!.image : null);
+    setSelectedNum(null);
+    setHasSaved(hasStoredLayout(key));
+  };
+
+  const resetToPreset = () => {
+    const p = PRESETS[vehicleKey];
     setConfig({ ...p, seats: p.seats.map((s) => ({ ...s })) });
     setCustomImage(null);
     setSelectedNum(null);
+  };
+
+  const saveLayout = () => {
+    const ok = saveLayoutToStorage(vehicleKey, config, !!customImage);
+    if (ok) {
+      setHasSaved(true);
+      toast.success(`Layout ${vehicleKey} disimpan — tampilan user diperbarui`);
+    } else {
+      toast.error("Gagal menyimpan (storage penuh?)");
+    }
+  };
+
+  const clearSaved = () => {
+    clearLayoutFromStorage(vehicleKey);
+    setHasSaved(false);
+    resetToPreset();
+    toast.success(`Simpanan ${vehicleKey} dihapus, kembali ke default`);
   };
 
   const updateSeat = (num: number, x: number, y: number) => {
@@ -85,9 +123,13 @@ export default function SeatLayoutEditor() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setCustomImage(url);
-    setConfig((c) => ({ ...c, image: url }));
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setCustomImage(dataUrl);
+      setConfig((c) => ({ ...c, image: dataUrl }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const exportSnippet = useMemo(() => {
@@ -128,9 +170,12 @@ ${seatsStr}
           <Button asChild variant="ghost" size="icon">
             <Link to="/shuttle"><ArrowLeft className="h-5 w-5" /></Link>
           </Button>
-          <div>
-            <h1 className="text-lg font-bold">Seat Layout Editor</h1>
-            <p className="text-xs text-muted-foreground">Drag kursi di atas denah, lalu export hasilnya</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold">Seat Layout Editor</h1>
+              {hasSaved && <Badge variant="secondary" className="text-[10px]">Tersimpan</Badge>}
+            </div>
+            <p className="text-xs text-muted-foreground">Drag kursi di atas denah, lalu simpan atau export</p>
           </div>
         </div>
       </header>
@@ -141,7 +186,7 @@ ${seatsStr}
           <Card className="space-y-3 p-4">
             <div>
               <Label>Kendaraan</Label>
-              <Select value={vehicleKey} onValueChange={(v) => loadPreset(v as keyof typeof PRESETS)}>
+              <Select value={vehicleKey} onValueChange={(v) => loadPreset(v as VehicleKey)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="HIACE">HiAce</SelectItem>
@@ -170,7 +215,15 @@ ${seatsStr}
             <Separator />
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={addSeat} size="sm" variant="outline"><Plus className="h-4 w-4" />Kursi</Button>
-              <Button onClick={() => loadPreset(vehicleKey)} size="sm" variant="outline"><RotateCcw className="h-4 w-4" />Reset</Button>
+              <Button onClick={resetToPreset} size="sm" variant="outline"><RotateCcw className="h-4 w-4" />Reset</Button>
+              <Button onClick={saveLayout} size="sm" className="col-span-2">
+                <Save className="h-4 w-4" />Simpan ke tampilan user
+              </Button>
+              {hasSaved && (
+                <Button onClick={clearSaved} size="sm" variant="ghost" className="col-span-2 text-destructive hover:text-destructive">
+                  <Eraser className="h-4 w-4" />Hapus simpanan
+                </Button>
+              )}
             </div>
           </Card>
 

@@ -77,12 +77,75 @@ export const PREMIO_LAYOUT: SeatLayoutConfig = {
   ],
 };
 
-export function getSeatLayout(vehicle: string, totalSeats: number): SeatLayoutConfig {
+export type VehicleKey = "HIACE" | "ELF" | "PREMIO";
+
+export const LAYOUT_STORAGE_KEY = (vehicle: VehicleKey) => `shuttle-seat-layout:${vehicle}`;
+
+export function vehicleKeyFromName(vehicle: string): VehicleKey {
   const v = vehicle.toLowerCase();
-  let base: SeatLayoutConfig;
-  if (v.includes("elf")) base = ELF_LAYOUT;
-  else if (v.includes("premio")) base = PREMIO_LAYOUT;
-  else base = HIACE_LAYOUT;
+  if (v.includes("elf")) return "ELF";
+  if (v.includes("premio")) return "PREMIO";
+  return "HIACE";
+}
+
+function getPresetByKey(key: VehicleKey): SeatLayoutConfig {
+  if (key === "ELF") return ELF_LAYOUT;
+  if (key === "PREMIO") return PREMIO_LAYOUT;
+  return HIACE_LAYOUT;
+}
+
+export function saveLayoutToStorage(key: VehicleKey, config: SeatLayoutConfig, includeImage: boolean): boolean {
+  try {
+    const payload: Partial<SeatLayoutConfig> = {
+      aspect: config.aspect,
+      driverSeat: config.driverSeat,
+      seats: config.seats,
+    };
+    if (includeImage) payload.image = config.image;
+    localStorage.setItem(LAYOUT_STORAGE_KEY(key), JSON.stringify(payload));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadLayoutFromStorage(key: VehicleKey): SeatLayoutConfig | null {
+  try {
+    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY(key));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SeatLayoutConfig>;
+    const preset = getPresetByKey(key);
+    return {
+      image: parsed.image || preset.image,
+      aspect: parsed.aspect || preset.aspect,
+      driverSeat: parsed.driverSeat || preset.driverSeat,
+      seats: parsed.seats || preset.seats,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function clearLayoutFromStorage(key: VehicleKey) {
+  try {
+    localStorage.removeItem(LAYOUT_STORAGE_KEY(key));
+  } catch {
+    // ignore
+  }
+}
+
+export function hasStoredLayout(key: VehicleKey): boolean {
+  try {
+    return !!localStorage.getItem(LAYOUT_STORAGE_KEY(key));
+  } catch {
+    return false;
+  }
+}
+
+export function getSeatLayout(vehicle: string, totalSeats: number): SeatLayoutConfig {
+  const key = vehicleKeyFromName(vehicle);
+  const stored = loadLayoutFromStorage(key);
+  const base: SeatLayoutConfig = stored || getPresetByKey(key);
 
   // Trim or extend seats to match totalSeats
   if (base.seats.length === totalSeats) return base;
