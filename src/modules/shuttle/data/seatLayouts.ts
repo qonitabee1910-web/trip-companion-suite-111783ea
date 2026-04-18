@@ -1,4 +1,6 @@
 import hiaceImg from "@/assets/shuttle/base-hiace.png";
+import suvImg from "@/assets/shuttle/base-suv.png";
+import minicarImg from "@/assets/shuttle/base-minicar.png";
 
 export interface SeatPosition {
   num: number;
@@ -13,7 +15,7 @@ export interface SeatLayoutConfig {
   seats: SeatPosition[];
 }
 
-// HiAce 14 seats: 1 driver (non-clickable) + front passenger 1, then rows of 2-2 with center aisle, last row of 4
+// HiAce 12 seats: 1 driver (non-clickable) + front passenger 1, then rows of 2-2 with center aisle, last row of 4
 export const HIACE_LAYOUT: SeatLayoutConfig = {
   image: hiaceImg,
   aspect: "1/2.2",
@@ -41,39 +43,31 @@ export const HIACE_LAYOUT: SeatLayoutConfig = {
   ],
 };
 
+// Mini Car / Elf-mini 4 seats: driver + 1 front passenger, 2 rear seats
 export const ELF_LAYOUT: SeatLayoutConfig = {
-  image: hiaceImg,
-  aspect: "1/2.2",
-  driverSeat: { x: 68, y: 14 },
+  image: minicarImg,
+  aspect: "1/1.75",
+  driverSeat: { x: 65, y: 22 },
   seats: [
-    { num: 1, x: 28, y: 14 },
-    { num: 2, x: 28, y: 30 },
-    { num: 3, x: 50, y: 30 },
-    { num: 4, x: 72, y: 30 },
-    { num: 5, x: 28, y: 46 },
-    { num: 6, x: 50, y: 46 },
-    { num: 7, x: 72, y: 46 },
-    { num: 8, x: 28, y: 62 },
-    { num: 9, x: 72, y: 62 },
-    { num: 10, x: 35, y: 80 },
-    { num: 11, x: 65, y: 80 },
+    { num: 1, x: 33, y: 22 },
+    { num: 2, x: 33, y: 62 },
+    { num: 3, x: 65, y: 62 },
+    { num: 4, x: 49, y: 80 },
   ],
 };
 
+// SUV 6 seats: driver + 1 front passenger, 2 middle row, 2 rear row
 export const PREMIO_LAYOUT: SeatLayoutConfig = {
-  image: hiaceImg,
-  aspect: "1/2.2",
-  driverSeat: { x: 68, y: 16 },
+  image: suvImg,
+  aspect: "1/2",
+  driverSeat: { x: 64, y: 18 },
   seats: [
-    { num: 1, x: 28, y: 16 },
-    { num: 2, x: 25, y: 36 },
-    { num: 3, x: 50, y: 36 },
-    { num: 4, x: 75, y: 36 },
-    { num: 5, x: 25, y: 56 },
-    { num: 6, x: 50, y: 56 },
-    { num: 7, x: 75, y: 56 },
-    { num: 8, x: 35, y: 78 },
-    { num: 9, x: 65, y: 78 },
+    { num: 1, x: 34, y: 18 },
+    { num: 2, x: 32, y: 44 },
+    { num: 3, x: 66, y: 44 },
+    { num: 4, x: 30, y: 66 },
+    { num: 5, x: 68, y: 66 },
+    { num: 6, x: 49, y: 84 },
   ],
 };
 
