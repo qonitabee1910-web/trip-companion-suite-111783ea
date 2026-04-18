@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -20,30 +21,67 @@ import {
   HIACE_LAYOUT,
   ELF_LAYOUT,
   PREMIO_LAYOUT,
+  saveLayoutToStorage,
+  loadLayoutFromStorage,
+  clearLayoutFromStorage,
+  hasStoredLayout,
   type SeatLayoutConfig,
   type SeatPosition,
+  type VehicleKey,
 } from "../data/seatLayouts";
 
-const PRESETS: Record<string, SeatLayoutConfig> = {
+const PRESETS: Record<VehicleKey, SeatLayoutConfig> = {
   HIACE: HIACE_LAYOUT,
   ELF: ELF_LAYOUT,
   PREMIO: PREMIO_LAYOUT,
 };
 
 export default function SeatLayoutEditor() {
-  const [vehicleKey, setVehicleKey] = useState<keyof typeof PRESETS>("HIACE");
-  const [config, setConfig] = useState<SeatLayoutConfig>({ ...PRESETS.HIACE, seats: [...PRESETS.HIACE.seats] });
+  const [vehicleKey, setVehicleKey] = useState<VehicleKey>("HIACE");
+  const [config, setConfig] = useState<SeatLayoutConfig>(() => {
+    const stored = loadLayoutFromStorage("HIACE");
+    const base = stored || PRESETS.HIACE;
+    return { ...base, seats: base.seats.map((s) => ({ ...s })) };
+  });
   const [selectedNum, setSelectedNum] = useState<number | null>(null);
   const [snap, setSnap] = useState(false);
   const [customImage, setCustomImage] = useState<string | null>(null);
+  const [hasSaved, setHasSaved] = useState(() => hasStoredLayout("HIACE"));
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const loadPreset = (key: keyof typeof PRESETS) => {
+  const loadPreset = (key: VehicleKey) => {
     setVehicleKey(key);
-    const p = PRESETS[key];
+    const stored = loadLayoutFromStorage(key);
+    const base = stored || PRESETS[key];
+    setConfig({ ...base, seats: base.seats.map((s) => ({ ...s })) });
+    const isCustomImg = !!stored?.image && stored.image !== PRESETS[key].image;
+    setCustomImage(isCustomImg ? stored!.image : null);
+    setSelectedNum(null);
+    setHasSaved(hasStoredLayout(key));
+  };
+
+  const resetToPreset = () => {
+    const p = PRESETS[vehicleKey];
     setConfig({ ...p, seats: p.seats.map((s) => ({ ...s })) });
     setCustomImage(null);
     setSelectedNum(null);
+  };
+
+  const saveLayout = () => {
+    const ok = saveLayoutToStorage(vehicleKey, config, !!customImage);
+    if (ok) {
+      setHasSaved(true);
+      toast.success(`Layout ${vehicleKey} disimpan — tampilan user diperbarui`);
+    } else {
+      toast.error("Gagal menyimpan (storage penuh?)");
+    }
+  };
+
+  const clearSaved = () => {
+    clearLayoutFromStorage(vehicleKey);
+    setHasSaved(false);
+    resetToPreset();
+    toast.success(`Simpanan ${vehicleKey} dihapus, kembali ke default`);
   };
 
   const updateSeat = (num: number, x: number, y: number) => {
