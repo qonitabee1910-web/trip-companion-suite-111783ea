@@ -1,33 +1,35 @@
 import { useState } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
-import { SHUTTLES } from "../data/shuttles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2 } from "lucide-react";
 import { SeatMap } from "../components/SeatMap";
+import { getService, getVehicleType, calcPrice, mockSeatsAvailable, SERVICES, VEHICLE_TYPES } from "../data/services";
+import { getRayon, DESTINATION } from "../data/rayons";
 
 const ShuttleBooking = () => {
-  const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const shuttle = SHUTTLES.find((s) => s.id === id);
+
+  const rayon = getRayon(params.get("rayon") || "A");
+  const service = getService(params.get("service") || "reguler") || SERVICES[0];
+  const vehicle = getVehicleType(params.get("vehicle") || "hiace") || VEHICLE_TYPES[0];
+  const pickup = params.get("pickup") || rayon?.pickupPoints[0] || "";
+  const time = params.get("time") || "06:00";
   const pax = Number(params.get("pax") || 1);
+
+  const totalSeats = vehicle.totalSeats;
+  const seatsLeft = mockSeatsAvailable(vehicle.id, service.tier, totalSeats);
+  const occupiedSeats = new Set(
+    Array.from({ length: totalSeats - seatsLeft }, (_, i) => ((i * 7) % totalSeats) + 1),
+  );
+
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
-  const [pickup, setPickup] = useState(shuttle?.pickupPoints[0] || "");
-  const [dropoff, setDropoff] = useState(shuttle?.dropoffPoints[0] || "");
   const [step, setStep] = useState<"seat" | "form" | "success">("seat");
   const [form, setForm] = useState({ name: "", phone: "" });
-
-  if (!shuttle) return null;
-
-  // Generate seat map (rows of 4: 2-aisle-2)
-  const totalSeats = shuttle.totalSeats;
-  const occupiedSeats = new Set(
-    Array.from({ length: totalSeats - shuttle.seatsAvailable }, (_, i) => (i * 7) % totalSeats + 1),
-  );
 
   const toggleSeat = (n: number) => {
     if (occupiedSeats.has(n)) return;
@@ -36,7 +38,8 @@ const ShuttleBooking = () => {
     );
   };
 
-  const total = shuttle.price * pax;
+  const unitPrice = calcPrice(vehicle, service);
+  const total = unitPrice * pax;
 
   if (step === "success") {
     return (
@@ -45,14 +48,17 @@ const ShuttleBooking = () => {
           <Card className="p-8 text-center">
             <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-2">Tiket Dikonfirmasi!</h1>
-            <p className="text-muted-foreground mb-6 font-mono font-bold">TRV-S{Date.now().toString().slice(-7)}</p>
+            <p className="text-muted-foreground mb-6 font-mono font-bold">
+              TRV-S{Date.now().toString().slice(-7)}
+            </p>
             <div className="text-left bg-muted/50 rounded-lg p-4 space-y-2 mb-6 text-sm">
-              <div className="flex justify-between"><span>Operator</span><span className="font-medium">{shuttle.operator}</span></div>
-              <div className="flex justify-between"><span>Rute</span><span className="font-medium">{shuttle.from} → {shuttle.to}</span></div>
-              <div className="flex justify-between"><span>Berangkat</span><span className="font-medium">{shuttle.departTime}</span></div>
-              <div className="flex justify-between"><span>Kursi</span><span className="font-medium">{selectedSeats.join(", ")}</span></div>
+              <div className="flex justify-between"><span>Rayon</span><span className="font-medium">{rayon?.name} ({rayon?.area})</span></div>
+              <div className="flex justify-between"><span>Tujuan</span><span className="font-medium">{DESTINATION.short}</span></div>
+              <div className="flex justify-between"><span>Service</span><span className="font-medium">{service.label}</span></div>
+              <div className="flex justify-between"><span>Kendaraan</span><span className="font-medium">{vehicle.label} • {vehicle.vehicleName}</span></div>
+              <div className="flex justify-between"><span>Berangkat</span><span className="font-medium">{time}</span></div>
               <div className="flex justify-between"><span>Jemput</span><span className="font-medium">{pickup}</span></div>
-              <div className="flex justify-between"><span>Antar</span><span className="font-medium">{dropoff}</span></div>
+              <div className="flex justify-between"><span>Kursi</span><span className="font-medium">{selectedSeats.join(", ")}</span></div>
               <div className="flex justify-between pt-2 border-t font-bold"><span>Total</span><span className="text-accent">Rp{total.toLocaleString("id-ID")}</span></div>
             </div>
             <Button onClick={() => navigate("/")} className="w-full">Kembali ke Beranda</Button>
@@ -89,14 +95,21 @@ const ShuttleBooking = () => {
   }
 
   return (
-    <ResponsiveLayout mobileTitle="Pilih Kursi" mobileBack={`/shuttle/search?${params.toString()}`} hideBottomNav mobileHeaderVariant="plain">
+    <ResponsiveLayout
+      mobileTitle="Pilih Kursi"
+      mobileBack={`/shuttle/vehicle?${params.toString()}`}
+      hideBottomNav
+      mobileHeaderVariant="plain"
+    >
       <div className="container max-w-3xl py-4 md:py-8 px-3 md:px-6 grid md:grid-cols-[1fr_300px] gap-4">
         <div className="space-y-4">
           <Card className="p-4">
-            <h2 className="font-semibold mb-3">Pilih Kursi ({selectedSeats.length}/{pax})</h2>
-            <p className="text-xs text-muted-foreground text-center mb-3">{shuttle.vehicle}</p>
+            <h2 className="font-semibold mb-1">Pilih Kursi ({selectedSeats.length}/{pax})</h2>
+            <p className="text-xs text-muted-foreground text-center mb-3">
+              {vehicle.label} • {vehicle.vehicleName} • {service.label}
+            </p>
             <SeatMap
-              vehicle={shuttle.vehicle}
+              vehicle={vehicle.id}
               totalSeats={totalSeats}
               occupied={occupiedSeats}
               selected={selectedSeats}
@@ -104,30 +117,17 @@ const ShuttleBooking = () => {
               onToggle={toggleSeat}
             />
           </Card>
-
-          <Card className="p-4 space-y-3">
-            <h2 className="font-semibold">Titik Jemput & Antar</h2>
-            <div>
-              <Label className="text-xs">Titik Jemput ({shuttle.from})</Label>
-              <select value={pickup} onChange={(e) => setPickup(e.target.value)} className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 text-sm">
-                {shuttle.pickupPoints.map((p) => <option key={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label className="text-xs">Titik Antar ({shuttle.to})</Label>
-              <select value={dropoff} onChange={(e) => setDropoff(e.target.value)} className="w-full mt-1 h-10 rounded-md border border-input bg-background px-3 text-sm">
-                {shuttle.dropoffPoints.map((p) => <option key={p}>{p}</option>)}
-              </select>
-            </div>
-          </Card>
         </div>
 
         <Card className="p-4 h-fit md:sticky md:top-4">
           <h3 className="font-semibold mb-3">Ringkasan</h3>
           <div className="space-y-1 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Operator</span><span className="font-medium">{shuttle.operator}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Rute</span><span className="font-medium">{shuttle.from}→{shuttle.to}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Berangkat</span><span className="font-medium">{shuttle.departTime}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Rayon</span><span className="font-medium">{rayon?.name}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Jemput</span><span className="font-medium truncate ml-2">{pickup}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Tujuan</span><span className="font-medium">{DESTINATION.short}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Service</span><span className="font-medium">{service.label}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Kendaraan</span><span className="font-medium">{vehicle.label}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Berangkat</span><span className="font-medium">{time}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Penumpang</span><span className="font-medium">{pax}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Kursi</span><span className="font-medium">{selectedSeats.join(", ") || "-"}</span></div>
             <div className="flex justify-between pt-2 border-t mt-2 font-bold"><span>Total</span><span className="text-accent">Rp{total.toLocaleString("id-ID")}</span></div>
