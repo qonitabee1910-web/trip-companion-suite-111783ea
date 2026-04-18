@@ -1,40 +1,81 @@
+import { useNavigate } from "react-router-dom";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
-import { ShuttleSearchForm } from "../components/ShuttleSearchForm";
-import { Bus } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Plane, MapPin, ArrowRight } from "lucide-react";
+import { RAYONS, DESTINATION } from "../data/rayons";
+
+const rayonAccent: Record<string, string> = {
+  A: "from-primary/15 to-primary/5 border-primary/30 text-primary",
+  B: "from-accent/15 to-accent/5 border-accent/30 text-accent",
+  C: "from-success/15 to-success/5 border-success/30 text-success",
+  D: "from-warning/15 to-warning/5 border-warning/30 text-warning",
+};
 
 const ShuttleHome = () => {
+  const navigate = useNavigate();
+
   return (
-    <ResponsiveLayout mobileTitle="Cari Shuttle" mobileBack="/" mobileSubtitle="Tiket shuttle antar kota">
-      <section className="bg-gradient-hero text-primary-foreground hidden md:block">
-        <div className="container py-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Bus className="h-8 w-8" />
-            <h1 className="text-3xl font-extrabold">Tiket Shuttle Antar Kota</h1>
+    <ResponsiveLayout
+      mobileTitle="Shuttle ke KNO"
+      mobileBack="/"
+      mobileSubtitle="Pilih rayon keberangkatanmu"
+    >
+      <section className="bg-gradient-hero text-primary-foreground">
+        <div className="container py-6 md:py-10 px-4">
+          <div className="flex items-center gap-2 text-xs md:text-sm text-white/80 mb-2">
+            <MapPin className="h-3.5 w-3.5" /> Tujuan tetap
           </div>
-          <p className="text-white/85">Bandung, Jakarta, Yogyakarta dan kota lain dengan operator terpercaya.</p>
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-white/15 flex items-center justify-center">
+              <Plane className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-3xl font-extrabold leading-tight">{DESTINATION.short}</h1>
+              <p className="text-xs md:text-sm text-white/85">{DESTINATION.name}</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="container -mt-6 md:-mt-10 px-3 md:px-6 pt-4 md:pt-0">
-        <ShuttleSearchForm />
-      </div>
+      <section className="container px-3 md:px-6 py-5 md:py-8">
+        <div className="flex items-end justify-between mb-3">
+          <div>
+            <h2 className="font-bold text-base md:text-lg">Pilih Rayon Keberangkatan</h2>
+            <p className="text-xs text-muted-foreground">Setiap rayon punya titik jemput berbeda</p>
+          </div>
+          <Badge variant="secondary">{RAYONS.length} Rayon</Badge>
+        </div>
 
-      <section className="container px-3 md:px-6 mt-8 pb-8">
-        <h2 className="text-lg font-bold mb-3">Rute Populer</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { from: "Jakarta", to: "Bandung", price: 135000 },
-            { from: "Jakarta", to: "Bogor", price: 75000 },
-            { from: "Bandung", to: "Yogyakarta", price: 250000 },
-            { from: "Surabaya", to: "Malang", price: 80000 },
-          ].map((r, i) => (
-            <div key={i} className="p-4 rounded-lg border bg-card hover:shadow-card transition-shadow cursor-pointer">
-              <p className="text-sm text-muted-foreground">{r.from} →</p>
-              <p className="font-semibold">{r.to}</p>
-              <p className="text-sm font-bold text-accent mt-2">mulai Rp{r.price.toLocaleString("id-ID")}</p>
-            </div>
+        <div className="grid grid-cols-2 gap-3">
+          {RAYONS.map((r) => (
+            <button
+              key={r.id}
+              onClick={() => navigate(`/shuttle/rayon/${r.id}`)}
+              className={`text-left rounded-xl border-2 bg-gradient-to-br p-4 transition-all hover:shadow-card hover:-translate-y-0.5 ${rayonAccent[r.id]}`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl font-black">{r.id}</span>
+                <ArrowRight className="h-4 w-4 opacity-70" />
+              </div>
+              <p className="font-bold text-foreground text-sm">{r.name}</p>
+              <p className="text-xs text-muted-foreground">{r.area}</p>
+              <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
+                <MapPin className="h-3 w-3" />
+                {r.pickupPoints.length} titik jemput
+              </div>
+            </button>
           ))}
         </div>
+      </section>
+
+      <section className="container px-3 md:px-6 pb-8">
+        <Card className="p-4 bg-muted/30 border-dashed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-semibold text-foreground">Cara pesan:</span> pilih rayon → tentukan titik jemput &
+            jam → pilih kelas service → pilih kendaraan → pilih kursi.
+          </p>
+        </Card>
       </section>
     </ResponsiveLayout>
   );

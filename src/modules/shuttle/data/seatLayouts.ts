@@ -83,8 +83,9 @@ export const LAYOUT_STORAGE_KEY = (vehicle: VehicleKey) => `shuttle-seat-layout:
 
 export function vehicleKeyFromName(vehicle: string): VehicleKey {
   const v = vehicle.toLowerCase();
-  if (v.includes("elf")) return "ELF";
-  if (v.includes("premio")) return "PREMIO";
+  // vehicle type ids from services.ts
+  if (v === "suv" || v.includes("premio")) return "PREMIO";
+  if (v === "minicar" || v.includes("elf") || v.includes("mini")) return "ELF";
   return "HIACE";
 }
 
