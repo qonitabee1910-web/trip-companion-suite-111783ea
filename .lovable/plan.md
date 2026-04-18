@@ -1,71 +1,43 @@
 
-# Modul Editor Posisi Kursi (Seat Layout Editor)
+# Simpan Layout dari Editor → Update Tampilan User
 
 ## Tujuan
-Membuat halaman admin/dev untuk **mengedit posisi kursi secara visual** di atas gambar denah mobil, lalu meng-export hasilnya sebagai konfigurasi siap-pakai untuk `seatLayouts.ts` — sehingga layout tampak realistis tanpa perlu menebak koordinat manual.
+Menambah tombol **Simpan** di Seat Layout Editor yang menyimpan hasil edit ke `localStorage`, lalu `SeatMap.tsx` (tampilan user di booking shuttle) otomatis membaca layout tersimpan tersebut sehingga perubahan editor langsung terlihat oleh user.
 
-## Halaman Baru: `/shuttle/seat-editor`
+## Mekanisme Penyimpanan
 
-Route baru `SeatLayoutEditor.tsx` (akses langsung via URL, tidak masuk navigasi user). Tidak butuh auth karena ini UI/UX showcase.
+Pakai `localStorage` (client-side, sesuai mode showcase tanpa backend):
+- Key: `shuttle-seat-layout:HIACE`, `shuttle-seat-layout:ELF`, `shuttle-seat-layout:PREMIO`
+- Value: JSON `{ aspect, driverSeat, seats, image? }`
+- `image` hanya disimpan kalau user upload custom (sebagai data URL base64) — kalau pakai default, tidak disimpan agar bundle asset tetap dipakai
 
-## Fitur Editor
+## Perubahan File
 
-### 1. Panel Kontrol (kiri / atas di mobile)
-- **Pilih kendaraan**: dropdown HiAce / Elf / Premio (load layout existing dari `seatLayouts.ts`)
-- **Upload gambar denah** (opsional): user bisa pilih file PNG sendiri sebagai background; default pakai `base-hiace.png`
-- **Aspect ratio**: input (default `1/2.2`)
-- **Tombol**: 
-  - `+ Tambah Kursi` (kursi baru muncul di tengah)
-  - `Set Sopir` (klik di canvas untuk pindahkan ikon stir)
-  - `Reset ke Default`
-  - `Export JSON` (copy ke clipboard + download `.ts` snippet)
+### 1. `src/modules/shuttle/data/seatLayouts.ts` (edit)
+Tambah helper:
+- `LAYOUT_STORAGE_KEY(vehicle)` → string key
+- `saveLayoutToStorage(vehicleKey, config)` → simpan ke localStorage
+- `loadLayoutFromStorage(vehicleKey)` → baca, return null kalau kosong
+- `clearLayoutFromStorage(vehicleKey)`
+- Modifikasi `getSeatLayout(vehicle, totalSeats)` agar **prioritaskan layout dari localStorage** sebelum fallback ke preset bawaan
 
-### 2. Canvas Edit (kanan)
-- Container `relative` dengan gambar denah sebagai background — sama seperti `SeatMap.tsx` versi user
-- Tiap kursi = tombol **draggable** (pakai pointer events: `onPointerDown` → track delta → update `x%, y%`)
-- Klik kursi → seleksi (highlight ring) → muncul panel kecil: nomor kursi, tombol hapus, input manual `x` & `y`
-- Snap-to-grid opsional (toggle, default off; grid 1%)
-- Driver seat juga draggable dengan ikon stir
+### 2. `src/modules/shuttle/pages/SeatLayoutEditor.tsx` (edit)
+- Tambah tombol **Simpan** (icon `Save`) di panel kontrol — di samping tombol Reset
+- Saat klik:
+  - Kalau `customImage` aktif → convert file ke data URL base64, simpan beserta layout
+  - Kalau pakai default → simpan tanpa field image
+  - Toast: "Layout HiAce disimpan — tampilan user sudah diperbarui"
+- Tambah tombol **Hapus Simpanan** (icon `Trash2` kecil) → `clearLayoutFromStorage` + reset ke preset, toast konfirmasi
+- Saat editor pertama dibuka / ganti vehicle → cek localStorage, kalau ada layout tersimpan langsung di-load (bukan preset default), tampilkan badge kecil "Tersimpan" sebagai indikator
 
-### 3. Daftar Kursi (bawah panel kiri)
-- List nomor kursi 1..N dengan posisi `(x%, y%)`
-- Klik item → fokus & seleksi kursi di canvas
-- Tombol naik/turun untuk reorder nomor
+### 3. `src/modules/shuttle/components/SeatMap.tsx` (tidak perlu diubah)
+Sudah pakai `getSeatLayout()` yang otomatis baca dari storage setelah perubahan #1.
 
-### 4. Export
-Output berupa snippet TypeScript siap paste ke `seatLayouts.ts`:
-```ts
-const HIACE_LAYOUT: SeatLayoutConfig = {
-  image: hiaceImg,
-  aspect: "1/2.2",
-  driverSeat: { x: 68, y: 14 },
-  seats: [
-    { num: 1, x: 28, y: 14 },
-    ...
-  ],
-};
-```
-Plus tombol "Copy to Clipboard" dengan toast konfirmasi.
+## Catatan Teknis
 
-## Komponen & File
-
-- **create**: `src/modules/shuttle/pages/SeatLayoutEditor.tsx` (halaman utama, ~250 baris)
-- **create**: `src/modules/shuttle/components/DraggableSeat.tsx` (1 tombol kursi yang bisa drag, reusable)
-- **edit**: `src/App.tsx` — tambah route `/shuttle/seat-editor`
-- **edit**: `src/modules/shuttle/data/seatLayouts.ts` — export `HIACE_LAYOUT`, `ELF_LAYOUT`, `PREMIO_LAYOUT` agar bisa di-load editor
-
-## Teknis Drag
-
-- Pakai pointer events native (tidak perlu library tambahan)
-- Saat `pointerdown` di kursi: simpan offset relatif terhadap container, set `setPointerCapture`
-- Saat `pointermove`: hitung `(clientX - rect.left) / rect.width * 100` → update state `x` (clamp 0–100)
-- Saat `pointerup`: release capture
-- Bekerja di mouse + touch
+- File upload → data URL pakai `FileReader.readAsDataURL` agar persist di localStorage (URL.createObjectURL hanya valid per session)
+- Quota localStorage ~5MB per origin → cukup untuk 3 layout + gambar kecil (warning toast kalau gagal save)
+- Tampilan user di `/shuttle/:id/book` akan otomatis pakai layout baru saat halaman dibuka berikutnya (tidak perlu refresh logic khusus karena `getSeatLayout` dipanggil saat render)
 
 ## Hasil
-
-Developer/admin buka `/shuttle/seat-editor` → pilih HiAce → drag tiap kursi tepat di atas gambar denah → klik **Export** → paste hasil ke `seatLayouts.ts`. Layout jadi presisi & realistis dalam hitungan menit, tanpa trial-error koordinat.
-
-## Catatan
-- Editor ini murni client-side (tidak save ke DB) — sesuai mode UI/UX showcase mock data.
-- Bisa dikembangkan nanti: simpan ke localStorage, multi-image upload per vehicle, preview mode "user view".
+Edit posisi kursi di `/shuttle/seat-editor` → klik **Simpan** → buka booking shuttle → seat map user persis sesuai hasil edit. Bisa di-reset kapan saja ke preset bawaan.
