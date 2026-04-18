@@ -215,7 +215,15 @@ ${seatsStr}
             <Separator />
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={addSeat} size="sm" variant="outline"><Plus className="h-4 w-4" />Kursi</Button>
-              <Button onClick={() => loadPreset(vehicleKey)} size="sm" variant="outline"><RotateCcw className="h-4 w-4" />Reset</Button>
+              <Button onClick={resetToPreset} size="sm" variant="outline"><RotateCcw className="h-4 w-4" />Reset</Button>
+              <Button onClick={saveLayout} size="sm" className="col-span-2">
+                <Save className="h-4 w-4" />Simpan ke tampilan user
+              </Button>
+              {hasSaved && (
+                <Button onClick={clearSaved} size="sm" variant="ghost" className="col-span-2 text-destructive hover:text-destructive">
+                  <Eraser className="h-4 w-4" />Hapus simpanan
+                </Button>
+              )}
             </div>
           </Card>
 
