@@ -170,9 +170,12 @@ ${seatsStr}
           <Button asChild variant="ghost" size="icon">
             <Link to="/shuttle"><ArrowLeft className="h-5 w-5" /></Link>
           </Button>
-          <div>
-            <h1 className="text-lg font-bold">Seat Layout Editor</h1>
-            <p className="text-xs text-muted-foreground">Drag kursi di atas denah, lalu export hasilnya</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold">Seat Layout Editor</h1>
+              {hasSaved && <Badge variant="secondary" className="text-[10px]">Tersimpan</Badge>}
+            </div>
+            <p className="text-xs text-muted-foreground">Drag kursi di atas denah, lalu simpan atau export</p>
           </div>
         </div>
       </header>
