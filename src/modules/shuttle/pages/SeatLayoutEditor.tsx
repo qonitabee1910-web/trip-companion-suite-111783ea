@@ -186,7 +186,7 @@ ${seatsStr}
           <Card className="space-y-3 p-4">
             <div>
               <Label>Kendaraan</Label>
-              <Select value={vehicleKey} onValueChange={(v) => loadPreset(v as keyof typeof PRESETS)}>
+              <Select value={vehicleKey} onValueChange={(v) => loadPreset(v as VehicleKey)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="HIACE">HiAce</SelectItem>
