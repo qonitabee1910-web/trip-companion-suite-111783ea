@@ -123,9 +123,13 @@ export default function SeatLayoutEditor() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setCustomImage(url);
-    setConfig((c) => ({ ...c, image: url }));
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setCustomImage(dataUrl);
+      setConfig((c) => ({ ...c, image: dataUrl }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const exportSnippet = useMemo(() => {
