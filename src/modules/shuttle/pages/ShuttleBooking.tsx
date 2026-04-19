@@ -143,7 +143,9 @@ const ShuttleBooking = () => {
       hideBottomNav
       mobileHeaderVariant="plain"
     >
-      <div className="container max-w-3xl py-4 md:py-8 px-3 md:px-6 grid md:grid-cols-[1fr_300px] gap-4">
+      <div className="container max-w-3xl py-4 md:py-8 px-3 md:px-6 space-y-4">
+        <StepperHeader current="seat" />
+        <div className="grid md:grid-cols-[1fr_300px] gap-4">
         <div className="space-y-4">
           <Card className="p-4">
             <h2 className="font-semibold mb-1">Pilih Kursi ({selectedSeats.length}/{pax})</h2>
