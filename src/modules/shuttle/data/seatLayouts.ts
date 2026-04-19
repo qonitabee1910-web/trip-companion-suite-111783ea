@@ -77,6 +77,7 @@ export const HIACE_EXEC_LAYOUT: SeatLayoutConfig = {
 export const SUV_REGULER_LAYOUT: SeatLayoutConfig = {
   image: suvImg,
   aspect: "1/2",
+  seatSize: 11,
   driverSeat: { x: 64, y: 18 },
   seats: [
     { num: 1, x: 34, y: 18 },
@@ -89,6 +90,7 @@ export const SUV_REGULER_LAYOUT: SeatLayoutConfig = {
 export const SUV_SEMI_LAYOUT: SeatLayoutConfig = {
   image: suvSemiImg,
   aspect: "1/2",
+  seatSize: 12,
   driverSeat: { x: 64, y: 18 },
   seats: [
     { num: 1, x: 34, y: 18 },
@@ -102,6 +104,7 @@ export const SUV_SEMI_LAYOUT: SeatLayoutConfig = {
 export const SUV_EXEC_LAYOUT: SeatLayoutConfig = {
   image: suvExecImg,
   aspect: "1/2",
+  seatSize: 13,
   driverSeat: { x: 64, y: 18 },
   seats: [
     { num: 1, x: 34, y: 18 },
@@ -116,6 +119,7 @@ export const SUV_EXEC_LAYOUT: SeatLayoutConfig = {
 export const MINICAR_REGULER_LAYOUT: SeatLayoutConfig = {
   image: minicarImg,
   aspect: "1/1.75",
+  seatSize: 13,
   driverSeat: { x: 65, y: 22 },
   seats: [
     { num: 1, x: 33, y: 22 },
@@ -127,6 +131,7 @@ export const MINICAR_REGULER_LAYOUT: SeatLayoutConfig = {
 export const MINICAR_SEMI_LAYOUT: SeatLayoutConfig = {
   image: minicarSemiImg,
   aspect: "1/1.75",
+  seatSize: 14,
   driverSeat: { x: 65, y: 22 },
   seats: [
     { num: 1, x: 35, y: 22 },
@@ -139,6 +144,7 @@ export const MINICAR_SEMI_LAYOUT: SeatLayoutConfig = {
 export const MINICAR_EXEC_LAYOUT: SeatLayoutConfig = {
   image: minicarExecImg,
   aspect: "1/1.75",
+  seatSize: 15,
   driverSeat: { x: 65, y: 22 },
   seats: [
     { num: 1, x: 35, y: 22 },
