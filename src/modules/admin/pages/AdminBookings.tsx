@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Ticket, Trash2, RotateCcw } from "lucide-react";
+import { Ticket, Trash2, RotateCcw, Eye } from "lucide-react";
 import {
   getBookings,
   updateBookingStatus,
@@ -41,6 +41,7 @@ import {
 } from "@/modules/shuttle/data/repository";
 import type { BookingStatus, ShuttleBooking } from "@/modules/shuttle/types/booking";
 import { useToast } from "@/hooks/use-toast";
+import { BookingDetailDrawer } from "../components/BookingDetailDrawer";
 
 const statusColor: Record<BookingStatus, string> = {
   confirmed: "bg-primary/10 text-primary border-primary/30",
@@ -53,6 +54,7 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState<ShuttleBooking[]>(getBookings());
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("");
+  const [detailBooking, setDetailBooking] = useState<ShuttleBooking | null>(null);
 
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
