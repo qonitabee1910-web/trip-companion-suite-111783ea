@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Disc3 } from "lucide-react";
+import { Disc3, X } from "lucide-react";
 
 interface DraggableSeatProps {
   x: number;
@@ -10,7 +10,9 @@ interface DraggableSeatProps {
   containerRef: React.RefObject<HTMLDivElement>;
   onMove: (x: number, y: number) => void;
   onSelect?: () => void;
+  onDelete?: () => void;
   snap?: number; // percentage step e.g. 1
+  size?: number; // percent of container width
 }
 
 export function DraggableSeat({
@@ -22,7 +24,9 @@ export function DraggableSeat({
   containerRef,
   onMove,
   onSelect,
+  onDelete,
   snap,
+  size = 11,
 }: DraggableSeatProps) {
   const dragging = useRef(false);
   const moved = useRef(false);
@@ -56,26 +60,44 @@ export function DraggableSeat({
   };
 
   return (
-    <button
-      type="button"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-[10px] font-bold border-2 touch-none cursor-move transition-shadow ${
-        isDriver
-          ? "bg-warning/20 border-warning text-warning rounded-full"
-          : selected
-            ? "bg-primary text-primary-foreground border-primary ring-2 ring-ring shadow-lg"
-            : "bg-card text-foreground border-primary/40 hover:border-primary"
-      }`}
+    <div
+      className="absolute -translate-x-1/2 -translate-y-1/2"
       style={{
         left: `${x}%`,
         top: `${y}%`,
-        width: "11%",
+        width: `${size}%`,
         aspectRatio: "1",
       }}
     >
-      {isDriver ? <Disc3 className="h-1/2 w-1/2" /> : label}
-    </button>
+      <button
+        type="button"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className={`flex h-full w-full items-center justify-center rounded-md text-[10px] font-bold border-2 touch-none cursor-move transition-shadow ${
+          isDriver
+            ? "bg-warning/20 border-warning text-warning rounded-full"
+            : selected
+              ? "bg-primary text-primary-foreground border-primary ring-2 ring-ring shadow-lg"
+              : "bg-card text-foreground border-primary/40 hover:border-primary"
+        }`}
+      >
+        {isDriver ? <Disc3 className="h-1/2 w-1/2" /> : label}
+      </button>
+      {onDelete && selected && !isDriver && (
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Hapus kursi"
+          className="absolute -right-1.5 -top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-md hover:scale-110 transition-transform"
+        >
+          <X className="h-3 w-3" strokeWidth={3} />
+        </button>
+      )}
+    </div>
   );
 }

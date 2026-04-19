@@ -19,7 +19,11 @@ export interface SeatLayoutConfig {
   aspect: string;
   driverSeat: { x: number; y: number };
   seats: SeatPosition[];
+  /** Ukuran tombol kursi dalam % container. Default 11. */
+  seatSize?: number;
 }
+
+export const DEFAULT_SEAT_SIZE = 11;
 
 // ============================================================
 // HIACE — 3 varian
@@ -224,6 +228,7 @@ export function saveLayoutToStorage(
       aspect: config.aspect,
       driverSeat: config.driverSeat,
       seats: config.seats,
+      seatSize: config.seatSize,
     };
     if (includeImage) payload.image = config.image;
     localStorage.setItem(LAYOUT_STORAGE_KEY(key), JSON.stringify(payload));
@@ -244,6 +249,7 @@ export function loadLayoutFromStorage(key: VehicleKey): SeatLayoutConfig | null 
       aspect: parsed.aspect || preset.aspect,
       driverSeat: parsed.driverSeat || preset.driverSeat,
       seats: parsed.seats || preset.seats,
+      seatSize: parsed.seatSize ?? preset.seatSize,
     };
   } catch {
     return null;
