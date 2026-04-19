@@ -290,6 +290,8 @@ const AdminRayons = () => {
                   }
                 />
               </div>
+              <div>
+                <Label>Nama</Label>
                 <Input
                   value={editing.data.name}
                   onChange={(e) =>
