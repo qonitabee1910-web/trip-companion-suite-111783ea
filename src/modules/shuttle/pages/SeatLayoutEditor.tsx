@@ -231,6 +231,19 @@ ${seatsStr}
               <Label htmlFor="snap" className="cursor-pointer">Snap to grid (1%)</Label>
               <Switch id="snap" checked={snap} onCheckedChange={setSnap} />
             </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <Label>Ukuran kursi</Label>
+                <span className="text-xs font-mono text-muted-foreground">{config.seatSize ?? DEFAULT_SEAT_SIZE}%</span>
+              </div>
+              <Slider
+                min={5}
+                max={18}
+                step={1}
+                value={[config.seatSize ?? DEFAULT_SEAT_SIZE]}
+                onValueChange={(v) => setConfig((c) => ({ ...c, seatSize: v[0] }))}
+              />
+            </div>
             <Separator />
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={addSeat} size="sm" variant="outline"><Plus className="h-4 w-4" />Kursi</Button>
@@ -238,6 +251,36 @@ ${seatsStr}
               <Button onClick={saveLayout} size="sm" className="col-span-2">
                 <Save className="h-4 w-4" />Simpan ke tampilan user
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="col-span-2 text-destructive hover:text-destructive"
+                    disabled={config.seats.length === 0}
+                  >
+                    <XCircle className="h-4 w-4" />Hapus semua kursi
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Hapus semua kursi?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Semua {config.seats.length} kursi pada layout {LAYOUT_LABELS[layoutKey]} akan dihapus.
+                      Driver seat tetap. Anda bisa menambah kursi baru lewat tombol "Kursi".
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={clearAllSeats}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Ya, hapus semua
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               {hasSaved && (
                 <Button onClick={clearSaved} size="sm" variant="ghost" className="col-span-2 text-destructive hover:text-destructive">
                   <Eraser className="h-4 w-4" />Hapus simpanan
