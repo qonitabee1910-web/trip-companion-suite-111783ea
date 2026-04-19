@@ -484,10 +484,15 @@ ${seatsStr}
             />
           ))}
         </div>
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
-        </p>
-      </Card>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
+          </p>
+        </Card>
+
+        <Card className="p-4 xl:sticky xl:top-20 xl:self-start">
+          <SeatEditorLivePreview config={config} />
+        </Card>
+      </div>
     </div>
   );
 }
