@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { User, RotateCcw } from "lucide-react";
+import { User, RotateCcw, Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Toggle } from "@/components/ui/toggle";
 import type { SeatLayoutConfig } from "../data/seatLayouts";
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
  */
 export function SeatEditorLivePreview({ config, occupiedCount = 2, maxSelect = 2 }: Props) {
   const [selected, setSelected] = useState<number[]>([]);
+  const [mobileMode, setMobileMode] = useState(false);
 
   const seatSize = config.seatSize ?? 11;
 
