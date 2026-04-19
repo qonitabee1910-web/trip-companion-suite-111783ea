@@ -50,7 +50,7 @@ const AdminVehicles = () => {
             <h2 className="font-semibold flex items-center gap-2">
               <Bus className="h-4 w-4 text-primary" /> Tipe Kendaraan
             </h2>
-            <p className="text-xs text-muted-foreground">Atur kapasitas & harga dasar tiap tipe.</p>
+            <p className="text-xs text-muted-foreground">Atur tipe kendaraan.</p>
           </div>
           <div className="flex gap-2">
             <AlertDialog>
@@ -114,22 +114,6 @@ const AdminVehicles = () => {
               <div>
                 <Label>Nama Kendaraan</Label>
                 <Input value={v.vehicleName} onChange={(e) => update(idx, { vehicleName: e.target.value })} />
-              </div>
-              <div>
-                <Label>Kapasitas Kursi</Label>
-                <Input
-                  type="number"
-                  value={v.totalSeats}
-                  onChange={(e) => update(idx, { totalSeats: Number(e.target.value) })}
-                />
-              </div>
-              <div>
-                <Label>Harga Dasar (Rp)</Label>
-                <Input
-                  type="number"
-                  value={v.basePrice}
-                  onChange={(e) => update(idx, { basePrice: Number(e.target.value) })}
-                />
               </div>
             </div>
             <div>

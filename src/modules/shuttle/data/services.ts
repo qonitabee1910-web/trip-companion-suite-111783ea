@@ -1,4 +1,5 @@
 import type { Rayon } from "./rayons";
+import { LAYOUT_PRESETS } from "./seatLayouts";
 
 export type ServiceTier = "reguler" | "semi-executive" | "executive";
 export type VehicleTypeId = "hiace" | "suv" | "minicar";
@@ -16,8 +17,6 @@ export interface VehicleType {
   id: VehicleTypeId;
   label: string;
   vehicleName: string;
-  totalSeats: number;
-  basePrice: number;
   description: string;
   active?: boolean; // default true
 }
@@ -54,8 +53,6 @@ export const VEHICLE_TYPES: VehicleType[] = [
     id: "hiace",
     label: "HiAce",
     vehicleName: "HiAce Premium",
-    totalSeats: 12,
-    basePrice: 120000,
     description: "Kapasitas besar, cocok rombongan keluarga.",
     active: true,
   },
@@ -63,8 +60,6 @@ export const VEHICLE_TYPES: VehicleType[] = [
     id: "suv",
     label: "SUV",
     vehicleName: "Premio",
-    totalSeats: 6,
-    basePrice: 180000,
     description: "Lebih privat, ruang kabin luas.",
     active: true,
   },
@@ -72,8 +67,6 @@ export const VEHICLE_TYPES: VehicleType[] = [
     id: "minicar",
     label: "Mini Car",
     vehicleName: "Elf Mini",
-    totalSeats: 4,
-    basePrice: 95000,
     description: "Hemat untuk solo & pasangan.",
     active: true,
   },
@@ -97,10 +90,18 @@ export function getVehicleType(id: string): VehicleType | undefined {
   return readLS<VehicleType[]>("shuttle-admin:vehicles", VEHICLE_TYPES).find((v) => v.id === id);
 }
 
+export function getTotalSeatsForVehicle(vehicleId: string): number {
+  const vehicleUpper = vehicleId.toUpperCase();
+  const layoutKey = `${vehicleUpper}_REGULER` as const;
+  const layout = LAYOUT_PRESETS[layoutKey as keyof typeof LAYOUT_PRESETS];
+  return layout?.seats.length ?? 0;
+}
+
 export function calcPrice(vehicle: VehicleType, service: ServiceConfig, rayon?: Rayon | null): number {
-  const base = vehicle.basePrice * service.priceMultiplier;
+  // Price calculation now based on service tier and rayon surcharge only
+  // Base vehicle pricing removed
   const surcharge = rayon?.surcharge ?? 0;
-  return Math.round((base + surcharge) / 1000) * 1000;
+  return Math.round(surcharge / 1000) * 1000;
 }
 
 // Deprecated: kept for backward compat. Real availability comes from inventory.ts.

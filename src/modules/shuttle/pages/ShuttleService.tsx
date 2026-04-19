@@ -24,10 +24,7 @@ const ShuttleService = () => {
   const SERVICES = getServicesAll().filter((s) => s.active !== false);
   const VEHICLE_TYPES = getVehicleTypesAll().filter((v) => v.active !== false);
 
-  const cheapestVehicle = VEHICLE_TYPES.reduce(
-    (min, v) => (v.basePrice < min.basePrice ? v : min),
-    VEHICLE_TYPES[0],
-  );
+  const cheapestVehicle = VEHICLE_TYPES[0];
 
   // Auto-skip if only one service active
   useEffect(() => {

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, AlertTriangle, Bus, Car, Caravan } from "lucide-react";
-import { calcPrice, getService } from "../data/services";
+import { calcPrice, getService, getTotalSeatsForVehicle } from "../data/services";
 import { getRayon, getDestination } from "../data/rayons";
 import { getServicesAll, getVehicleTypesAll } from "../data/repository";
 import { getAvailableCount } from "../data/inventory";
@@ -55,12 +55,13 @@ const ShuttleVehicle = () => {
 
         {VEHICLE_TYPES.map((v) => {
           const Icon = vehicleIcon[v.id];
+          const totalSeats = getTotalSeatsForVehicle(v.id);
           const total = calcPrice(v, service, rayon) * pax;
           const seatsLeft = getAvailableCount(
             { date, time, rayonId, vehicleId: v.id, tier: service.tier },
-            v.totalSeats,
+            totalSeats,
           );
-          const lowSeats = seatsLeft / v.totalSeats < 0.3;
+          const lowSeats = seatsLeft / totalSeats < 0.3;
           const notEnough = seatsLeft < pax;
 
           return (
@@ -90,7 +91,7 @@ const ShuttleVehicle = () => {
 
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     <Badge variant="secondary" className="text-[10px]">
-                      <Users className="h-3 w-3 mr-1" /> {v.totalSeats} kursi
+                      <Users className="h-3 w-3 mr-1" /> {totalSeats} kursi
                     </Badge>
                     <Badge
                       variant={lowSeats ? "destructive" : "outline"}
