@@ -30,7 +30,13 @@ const ShuttleRayon = () => {
   }
 
   const handleNext = () => {
-    const params = new URLSearchParams({ rayon: rayon.id, pickup, time, pax: String(pax) });
+    const params = new URLSearchParams({
+      rayon: rayon.id,
+      pickup,
+      date: format(date, "yyyy-MM-dd"),
+      time,
+      pax: String(pax),
+    });
     navigate(`/shuttle/service?${params.toString()}`);
   };
 
