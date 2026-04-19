@@ -53,5 +53,17 @@ export const DESTINATION = {
 };
 
 export function getRayon(id: string): Rayon | undefined {
+  // Read via repository so admin edits are reflected. Lazy import to avoid circular.
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("shuttle-admin:rayons");
+      if (raw) {
+        const list = JSON.parse(raw) as Rayon[];
+        return list.find((r) => r.id === id.toUpperCase());
+      }
+    } catch {
+      /* fallthrough */
+    }
+  }
   return RAYONS.find((r) => r.id === id.toUpperCase());
 }

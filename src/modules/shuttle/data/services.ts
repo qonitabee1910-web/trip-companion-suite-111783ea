@@ -69,12 +69,22 @@ export const VEHICLE_TYPES: VehicleType[] = [
   },
 ];
 
+function readLS<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function getService(tier: string): ServiceConfig | undefined {
-  return SERVICES.find((s) => s.tier === tier);
+  return readLS<ServiceConfig[]>("shuttle-admin:services", SERVICES).find((s) => s.tier === tier);
 }
 
 export function getVehicleType(id: string): VehicleType | undefined {
-  return VEHICLE_TYPES.find((v) => v.id === id);
+  return readLS<VehicleType[]>("shuttle-admin:vehicles", VEHICLE_TYPES).find((v) => v.id === id);
 }
 
 export function calcPrice(vehicle: VehicleType, service: ServiceConfig): number {
