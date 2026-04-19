@@ -1,4 +1,4 @@
-import { LayoutDashboard, MapPin, Sparkles, Bus, Ticket, Armchair, ExternalLink } from "lucide-react";
+import { LayoutDashboard, MapPin, Sparkles, Bus, Ticket, Armchair, ExternalLink, ScanLine } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ const items = [
   { title: "Service", url: "/admin/shuttle/services", icon: Sparkles },
   { title: "Kendaraan", url: "/admin/shuttle/vehicles", icon: Bus },
   { title: "Booking", url: "/admin/shuttle/bookings", icon: Ticket },
+  { title: "Scan Tiket", url: "/admin/shuttle/scan", icon: ScanLine },
 ];
 
 export function AdminSidebar() {
