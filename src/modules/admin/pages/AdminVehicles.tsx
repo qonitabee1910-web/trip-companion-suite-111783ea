@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Save, RotateCcw, Bus, Armchair, ExternalLink } from "lucide-react";
+import { Save, RotateCcw, Bus, Armchair } from "lucide-react";
 import { getVehicleTypesAll, saveVehicleTypes, resetSection } from "@/modules/shuttle/data/repository";
 import type { VehicleType } from "@/modules/shuttle/data/services";
 import { useToast } from "@/hooks/use-toast";
@@ -77,13 +77,24 @@ const AdminVehicles = () => {
 
         {vehicles.map((v, idx) => (
           <Card key={v.id} className="p-4 md:p-5 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{v.id}</span>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/shuttle/seat-editor" target="_blank">
-                  <Armchair className="h-4 w-4" /> Edit denah <ExternalLink className="h-3 w-3" />
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="text-xs text-muted-foreground mr-1 flex items-center gap-1">
+                  <Armchair className="h-3.5 w-3.5" /> Edit denah:
+                </span>
+                {([
+                  { tier: "reguler", label: "Reguler" },
+                  { tier: "semi-executive", label: "Semi" },
+                  { tier: "executive", label: "Exec" },
+                ] as const).map((t) => (
+                  <Button key={t.tier} asChild variant="outline" size="sm" className="h-7 px-2 text-xs">
+                    <Link to={`/admin/shuttle/seat-editor?vehicle=${v.id}&tier=${t.tier}`}>
+                      {t.label}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>

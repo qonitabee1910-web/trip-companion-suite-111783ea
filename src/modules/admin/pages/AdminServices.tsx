@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { AdminLayout } from "../components/AdminLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Save, RotateCcw, Sparkles } from "lucide-react";
+import { Save, RotateCcw, Sparkles, Armchair } from "lucide-react";
 import { getServicesAll, saveServices, resetSection } from "@/modules/shuttle/data/repository";
 import type { ServiceConfig } from "@/modules/shuttle/data/services";
 import { useToast } from "@/hooks/use-toast";
@@ -78,8 +79,13 @@ const AdminServices = () => {
 
         {services.map((s, idx) => (
           <Card key={s.tier} className="p-4 md:p-5 space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{s.tier}</span>
+              <Button asChild variant="outline" size="sm" className="h-7 text-xs">
+                <Link to={`/admin/shuttle/seat-editor?tier=${s.tier}`}>
+                  <Armchair className="h-3.5 w-3.5" /> Atur denah kursi
+                </Link>
+              </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
