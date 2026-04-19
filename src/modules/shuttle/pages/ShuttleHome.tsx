@@ -3,8 +3,7 @@ import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plane, MapPin, ArrowRight } from "lucide-react";
-import { DESTINATION } from "../data/rayons";
-import { getRayons } from "../data/repository";
+import { getRayons, getDestinationStored, getContentStored } from "../data/repository";
 
 const rayonAccent: Record<string, string> = {
   A: "from-primary/15 to-primary/5 border-primary/30 text-primary",
@@ -16,12 +15,14 @@ const rayonAccent: Record<string, string> = {
 const ShuttleHome = () => {
   const navigate = useNavigate();
   const RAYONS = getRayons();
+  const DESTINATION = getDestinationStored();
+  const content = getContentStored();
 
   return (
     <ResponsiveLayout
-      mobileTitle="Shuttle ke KNO"
+      mobileTitle={content.heroTitle}
       mobileBack="/"
-      mobileSubtitle="Pilih rayon keberangkatanmu"
+      mobileSubtitle={content.heroSubtitle}
     >
       <section className="bg-gradient-hero text-primary-foreground">
         <div className="container py-6 md:py-10 px-4">
@@ -54,7 +55,7 @@ const ShuttleHome = () => {
             <button
               key={r.id}
               onClick={() => navigate(`/shuttle/rayon/${r.id}`)}
-              className={`text-left rounded-xl border-2 bg-gradient-to-br p-4 transition-all hover:shadow-card hover:-translate-y-0.5 ${rayonAccent[r.id]}`}
+              className={`text-left rounded-xl border-2 bg-gradient-to-br p-4 transition-all hover:shadow-card hover:-translate-y-0.5 ${rayonAccent[r.id] ?? "from-muted to-muted/30 border-border text-foreground"}`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl font-black">{r.id}</span>
@@ -73,10 +74,7 @@ const ShuttleHome = () => {
 
       <section className="container px-3 md:px-6 pb-8">
         <Card className="p-4 bg-muted/30 border-dashed">
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="font-semibold text-foreground">Cara pesan:</span> pilih rayon → tentukan titik jemput &
-            jam → pilih kelas service → pilih kendaraan → pilih kursi.
-          </p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{content.footerNote}</p>
         </Card>
       </section>
     </ResponsiveLayout>
