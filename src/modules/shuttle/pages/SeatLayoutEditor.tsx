@@ -377,6 +377,7 @@ ${seatsStr}
               containerRef={containerRef}
               onMove={updateDriver}
               snap={snap ? 1 : 0}
+              size={config.seatSize ?? DEFAULT_SEAT_SIZE}
             />
             {config.seats.map((s: SeatPosition) => (
               <DraggableSeat
@@ -388,12 +389,14 @@ ${seatsStr}
                 containerRef={containerRef}
                 onMove={(x, y) => updateSeat(s.num, x, y)}
                 onSelect={() => setSelectedNum(s.num)}
+                onDelete={() => removeSeat(s.num)}
                 snap={snap ? 1 : 0}
+                size={config.seatSize ?? DEFAULT_SEAT_SIZE}
               />
             ))}
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Drag tombol untuk memindahkan • Klik untuk seleksi & edit manual
+            Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
           </p>
         </Card>
       </main>
