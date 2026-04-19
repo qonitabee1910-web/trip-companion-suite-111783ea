@@ -54,13 +54,14 @@ const ShuttleRayon = () => {
 
   return (
     <ResponsiveLayout
-      mobileTitle={`${rayon.name} → KNO`}
+      mobileTitle={`${rayon.name} → ${DESTINATION.short}`}
       mobileBack="/shuttle"
       mobileSubtitle={rayon.area}
       hideBottomNav
       mobileHeaderVariant="plain"
     >
       <div className="container max-w-2xl py-4 md:py-8 px-3 md:px-6 space-y-4">
+        <StepperHeader current="schedule" />
         <Card className="p-4 md:p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -163,9 +164,10 @@ const ShuttleRayon = () => {
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="w-10 text-center text-lg font-bold">{pax}</span>
-              <Button variant="outline" size="icon" onClick={() => setPax(Math.min(12, pax + 1))}>
+              <Button variant="outline" size="icon" onClick={() => setPax(Math.min(content.paxMax, pax + 1))}>
                 <Plus className="h-4 w-4" />
               </Button>
+              <span className="text-xs text-muted-foreground ml-1">max {content.paxMax}</span>
             </div>
           </div>
         </Card>
