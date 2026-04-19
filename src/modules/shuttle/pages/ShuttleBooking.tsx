@@ -64,6 +64,7 @@ const ShuttleBooking = () => {
               <div className="flex justify-between"><span>Tujuan</span><span className="font-medium">{DESTINATION.short}</span></div>
               <div className="flex justify-between"><span>Service</span><span className="font-medium">{service.label}</span></div>
               <div className="flex justify-between"><span>Kendaraan</span><span className="font-medium">{vehicle.label} • {vehicle.vehicleName}</span></div>
+              <div className="flex justify-between"><span>Tanggal</span><span className="font-medium">{dateLabel}</span></div>
               <div className="flex justify-between"><span>Berangkat</span><span className="font-medium">{time}</span></div>
               <div className="flex justify-between"><span>Jemput</span><span className="font-medium">{pickup}</span></div>
               <div className="flex justify-between"><span>Kursi</span><span className="font-medium">{selectedSeats.join(", ")}</span></div>
