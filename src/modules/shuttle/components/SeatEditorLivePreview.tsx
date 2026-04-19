@@ -47,6 +47,16 @@ export function SeatEditorLivePreview({ config, occupiedCount = 2, maxSelect = 2
         </div>
         <div className="flex items-center gap-1">
           <Badge variant="outline" className="text-[10px]">{config.seats.length} seats</Badge>
+          <Toggle
+            size="sm"
+            pressed={mobileMode}
+            onPressedChange={setMobileMode}
+            aria-label="Toggle mode mobile"
+            title={mobileMode ? "Mode desktop" : "Mode mobile (375px)"}
+            className="h-7 w-7 p-0"
+          >
+            {mobileMode ? <Smartphone className="h-3.5 w-3.5" /> : <Monitor className="h-3.5 w-3.5" />}
+          </Toggle>
           {selected.length > 0 && (
             <Button
               size="icon"
@@ -61,15 +71,53 @@ export function SeatEditorLivePreview({ config, occupiedCount = 2, maxSelect = 2
         </div>
       </div>
 
-      <div
-        className="relative mx-auto w-full max-w-[260px] rounded-xl bg-muted/30 p-2"
-        style={{ aspectRatio: config.aspect }}
-      >
-        <img
-          src={config.image}
-          alt="Denah preview"
-          className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
-          draggable={false}
+      {mobileMode ? (
+        <div className="mx-auto w-[375px] max-w-full rounded-[2rem] border-8 border-foreground/80 bg-background shadow-xl overflow-hidden">
+          <div className="h-5 bg-foreground/80 flex items-center justify-center">
+            <div className="h-1 w-12 rounded-full bg-background/40" />
+          </div>
+          <div className="p-3 bg-background">
+            <p className="text-[10px] text-muted-foreground text-center mb-2">375 × auto • iPhone-like</p>
+            <div
+              className="relative mx-auto w-full max-w-[260px] rounded-xl bg-muted/30 p-2"
+              style={{ aspectRatio: config.aspect }}
+            >
+              <PreviewSeats config={config} seatSize={seatSize} occupiedSet={occupiedSet} selected={selected} maxSelect={maxSelect} onToggle={toggle} />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="relative mx-auto w-full max-w-[260px] rounded-xl bg-muted/30 p-2"
+          style={{ aspectRatio: config.aspect }}
+        >
+          <PreviewSeats config={config} seatSize={seatSize} occupiedSet={occupiedSet} selected={selected} maxSelect={maxSelect} onToggle={toggle} />
+        </div>
+      )}
+
+      {/* legend */}
+      <Legend />
+    </div>
+  );
+}
+
+interface SeatsProps {
+  config: SeatLayoutConfig;
+  seatSize: number;
+  occupiedSet: Set<number>;
+  selected: number[];
+  maxSelect: number;
+  onToggle: (n: number) => void;
+}
+
+function PreviewSeats({ config, seatSize, occupiedSet, selected, maxSelect, onToggle }: SeatsProps) {
+  return (
+    <>
+      <img
+        src={config.image}
+        alt="Denah preview"
+        className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+        draggable={false}
         />
 
         {/* Driver */}
