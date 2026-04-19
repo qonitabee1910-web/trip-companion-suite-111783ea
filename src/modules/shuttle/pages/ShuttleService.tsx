@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Sparkles, Crown, Gauge } from "lucide-react";
-import { SERVICES, VEHICLE_TYPES, calcPrice } from "../data/services";
+import { calcPrice } from "../data/services";
 import { getRayon, DESTINATION } from "../data/rayons";
+import { getServicesAll, getVehicleTypesAll } from "../data/repository";
 
 const tierIcon = {
   reguler: Gauge,
@@ -17,6 +18,8 @@ const ShuttleService = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rayon = getRayon(params.get("rayon") || "A");
+  const SERVICES = getServicesAll();
+  const VEHICLE_TYPES = getVehicleTypesAll();
 
   const cheapestVehicle = VEHICLE_TYPES.reduce((min, v) => (v.basePrice < min.basePrice ? v : min), VEHICLE_TYPES[0]);
 

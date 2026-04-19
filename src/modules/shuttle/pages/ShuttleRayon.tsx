@@ -17,9 +17,10 @@ const ShuttleRayon = () => {
   const { id = "A" } = useParams();
   const navigate = useNavigate();
   const rayon = getRayon(id);
+  const DEPART_TIMES = getDepartTimes();
   const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
   const [date, setDate] = useState<Date>(startOfToday());
-  const [time, setTime] = useState(DEPART_TIMES[1]);
+  const [time, setTime] = useState(DEPART_TIMES[1] ?? DEPART_TIMES[0] ?? "06:00");
   const [pax, setPax] = useState(1);
 
   if (!rayon) {

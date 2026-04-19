@@ -15,6 +15,7 @@ const rayonAccent: Record<string, string> = {
 
 const ShuttleHome = () => {
   const navigate = useNavigate();
+  const RAYONS = getRayons();
 
   return (
     <ResponsiveLayout
