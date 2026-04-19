@@ -1,4 +1,12 @@
-import { RAYONS as DEFAULT_RAYONS, DEPART_TIMES as DEFAULT_TIMES, type Rayon } from "./rayons";
+import {
+  RAYONS as DEFAULT_RAYONS,
+  DEPART_TIMES as DEFAULT_TIMES,
+  DEFAULT_DESTINATION,
+  DEFAULT_CONTENT,
+  type Rayon,
+  type Destination,
+  type ShuttleContent,
+} from "./rayons";
 import {
   SERVICES as DEFAULT_SERVICES,
   VEHICLE_TYPES as DEFAULT_VEHICLES,
@@ -13,6 +21,9 @@ const KEY = {
   services: "shuttle-admin:services",
   vehicles: "shuttle-admin:vehicles",
   bookings: "shuttle-admin:bookings",
+  destination: "shuttle-admin:destination",
+  content: "shuttle-admin:content",
+  inventory: "shuttle-admin:inventory",
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -95,13 +106,37 @@ export function deleteBooking(id: string) {
   write(KEY.bookings, getBookings().filter((b) => b.id !== id));
 }
 
+// ---------- Destination & Content ----------
+export function getDestinationStored(): Destination {
+  return read<Destination>(KEY.destination, DEFAULT_DESTINATION);
+}
+export function saveDestination(d: Destination) {
+  write(KEY.destination, d);
+}
+export function getContentStored(): ShuttleContent {
+  return read<ShuttleContent>(KEY.content, DEFAULT_CONTENT);
+}
+export function saveContent(c: ShuttleContent) {
+  write(KEY.content, c);
+}
+
 // ---------- Reset ----------
 export function resetAll() {
   if (typeof window === "undefined") return;
   Object.values(KEY).forEach((k) => localStorage.removeItem(k));
 }
 
-export function resetSection(section: "rayons" | "times" | "services" | "vehicles" | "bookings") {
+export type ResettableSection =
+  | "rayons"
+  | "times"
+  | "services"
+  | "vehicles"
+  | "bookings"
+  | "destination"
+  | "content"
+  | "inventory";
+
+export function resetSection(section: ResettableSection) {
   if (typeof window === "undefined") return;
   localStorage.removeItem(KEY[section]);
 }
