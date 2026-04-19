@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Save, RotateCcw, Bus, Armchair } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { getVehicleTypesAll, saveVehicleTypes, resetSection } from "@/modules/shuttle/data/repository";
 import type { VehicleType } from "@/modules/shuttle/data/services";
 import { useToast } from "@/hooks/use-toast";
@@ -78,7 +79,16 @@ const AdminVehicles = () => {
         {vehicles.map((v, idx) => (
           <Card key={v.id} className="p-4 md:p-5 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{v.id}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{v.id}</span>
+                <label className="flex items-center gap-2 text-xs">
+                  <Switch
+                    checked={v.active !== false}
+                    onCheckedChange={(checked) => update(idx, { active: checked })}
+                  />
+                  <span className="text-muted-foreground">{v.active !== false ? "Aktif" : "Nonaktif"}</span>
+                </label>
+              </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <span className="text-xs text-muted-foreground mr-1 flex items-center gap-1">
                   <Armchair className="h-3.5 w-3.5" /> Edit denah:

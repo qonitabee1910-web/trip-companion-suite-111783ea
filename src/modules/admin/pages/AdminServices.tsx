@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Save, RotateCcw, Sparkles, Armchair } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { getServicesAll, saveServices, resetSection } from "@/modules/shuttle/data/repository";
 import type { ServiceConfig } from "@/modules/shuttle/data/services";
 import { useToast } from "@/hooks/use-toast";
@@ -80,7 +81,16 @@ const AdminServices = () => {
         {services.map((s, idx) => (
           <Card key={s.tier} className="p-4 md:p-5 space-y-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{s.tier}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs px-2 py-1 rounded bg-muted">{s.tier}</span>
+                <label className="flex items-center gap-2 text-xs">
+                  <Switch
+                    checked={s.active !== false}
+                    onCheckedChange={(v) => update(idx, { active: v })}
+                  />
+                  <span className="text-muted-foreground">{s.active !== false ? "Aktif" : "Nonaktif"}</span>
+                </label>
+              </div>
               <Button asChild variant="outline" size="sm" className="h-7 text-xs">
                 <Link to={`/admin/shuttle/seat-editor?tier=${s.tier}`}>
                   <Armchair className="h-3.5 w-3.5" /> Atur denah kursi
