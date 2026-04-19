@@ -31,6 +31,7 @@ export const DEFAULT_SEAT_SIZE = 11;
 export const HIACE_REGULER_LAYOUT: SeatLayoutConfig = {
   image: hiaceImg,
   aspect: "1/2.2",
+  seatSize: 9,
   driverSeat: { x: 68, y: 14 },
   seats: [
     { num: 1, x: 28, y: 14 },
@@ -44,6 +45,7 @@ export const HIACE_REGULER_LAYOUT: SeatLayoutConfig = {
 export const HIACE_SEMI_LAYOUT: SeatLayoutConfig = {
   image: hiaceSemiImg,
   aspect: "1/2.2",
+  seatSize: 10,
   driverSeat: { x: 68, y: 14 },
   seats: [
     { num: 1, x: 28, y: 14 },
@@ -58,6 +60,7 @@ export const HIACE_SEMI_LAYOUT: SeatLayoutConfig = {
 export const HIACE_EXEC_LAYOUT: SeatLayoutConfig = {
   image: hiaceExecImg,
   aspect: "1/2.2",
+  seatSize: 11,
   driverSeat: { x: 68, y: 12 },
   seats: [
     { num: 1, x: 28, y: 12 },
