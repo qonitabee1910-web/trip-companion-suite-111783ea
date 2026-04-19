@@ -92,6 +92,37 @@ const ShuttleRayon = () => {
 
           <div>
             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" /> Tanggal Berangkat
+            </h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-11",
+                    !date && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, "EEEE, d MMM yyyy", { locale: localeId })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => d && setDate(d)}
+                  disabled={(d) => d < startOfToday()}
+                  initialFocus
+                  locale={localeId}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" /> Jam Berangkat
             </h3>
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
