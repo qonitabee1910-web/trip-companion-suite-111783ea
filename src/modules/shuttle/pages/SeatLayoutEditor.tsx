@@ -157,6 +157,7 @@ export default function SeatLayoutEditor() {
     return `export const ${layoutKey}_LAYOUT: SeatLayoutConfig = {
   image: ${layoutKey.toLowerCase()}Img,
   aspect: "${config.aspect}",
+  seatSize: ${config.seatSize ?? DEFAULT_SEAT_SIZE},
   driverSeat: { x: ${config.driverSeat.x}, y: ${config.driverSeat.y} },
   seats: [
 ${seatsStr}
