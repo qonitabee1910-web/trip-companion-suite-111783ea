@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Printer, User, Phone, MapPin, Calendar, Clock, Ticket, Armchair } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { SeatMap } from "@/modules/shuttle/components/SeatMap";
 import type { ShuttleBooking, BookingStatus } from "@/modules/shuttle/types/booking";
 import type { ServiceTier } from "@/modules/shuttle/data/seatLayouts";
