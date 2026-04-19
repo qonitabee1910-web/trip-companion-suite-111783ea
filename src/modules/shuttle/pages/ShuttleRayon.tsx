@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { DESTINATION, getRayon } from "../data/rayons";
-import { getDepartTimes } from "../data/repository";
+import { getRayon, getDestination, getContent } from "../data/rayons";
+import { getDepartTimes, getServicesAll } from "../data/repository";
+import { StepperHeader } from "@/shared/components/StepperHeader";
 import { MapPin, Plane, Users, Minus, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const ShuttleRayon = () => {
@@ -18,6 +19,9 @@ const ShuttleRayon = () => {
   const navigate = useNavigate();
   const rayon = getRayon(id);
   const DEPART_TIMES = getDepartTimes();
+  const DESTINATION = getDestination();
+  const content = getContent();
+  const activeServices = getServicesAll().filter((s) => s.active !== false);
   const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
   const [date, setDate] = useState<Date>(startOfToday());
   const [time, setTime] = useState(DEPART_TIMES[1] ?? DEPART_TIMES[0] ?? "06:00");
@@ -39,18 +43,25 @@ const ShuttleRayon = () => {
       time,
       pax: String(pax),
     });
+    // Auto-skip service step if only 1 active service
+    if (activeServices.length === 1) {
+      params.set("service", activeServices[0].tier);
+      navigate(`/shuttle/vehicle?${params.toString()}`);
+      return;
+    }
     navigate(`/shuttle/service?${params.toString()}`);
   };
 
   return (
     <ResponsiveLayout
-      mobileTitle={`${rayon.name} → KNO`}
+      mobileTitle={`${rayon.name} → ${DESTINATION.short}`}
       mobileBack="/shuttle"
       mobileSubtitle={rayon.area}
       hideBottomNav
       mobileHeaderVariant="plain"
     >
       <div className="container max-w-2xl py-4 md:py-8 px-3 md:px-6 space-y-4">
+        <StepperHeader current="schedule" />
         <Card className="p-4 md:p-5">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -153,9 +164,10 @@ const ShuttleRayon = () => {
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="w-10 text-center text-lg font-bold">{pax}</span>
-              <Button variant="outline" size="icon" onClick={() => setPax(Math.min(12, pax + 1))}>
+              <Button variant="outline" size="icon" onClick={() => setPax(Math.min(content.paxMax, pax + 1))}>
                 <Plus className="h-4 w-4" />
               </Button>
+              <span className="text-xs text-muted-foreground ml-1">max {content.paxMax}</span>
             </div>
           </div>
         </Card>

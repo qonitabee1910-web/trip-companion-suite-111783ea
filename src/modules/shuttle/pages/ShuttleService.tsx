@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { Card } from "@/components/ui/card";
@@ -5,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Sparkles, Crown, Gauge } from "lucide-react";
 import { calcPrice } from "../data/services";
-import { getRayon, DESTINATION } from "../data/rayons";
+import { getRayon, getDestination } from "../data/rayons";
 import { getServicesAll, getVehicleTypesAll } from "../data/repository";
+import { StepperHeader } from "@/shared/components/StepperHeader";
 
 const tierIcon = {
   reguler: Gauge,
@@ -18,14 +20,33 @@ const ShuttleService = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rayon = getRayon(params.get("rayon") || "A");
-  const SERVICES = getServicesAll();
-  const VEHICLE_TYPES = getVehicleTypesAll();
+  const DESTINATION = getDestination();
+  const SERVICES = getServicesAll().filter((s) => s.active !== false);
+  const VEHICLE_TYPES = getVehicleTypesAll().filter((v) => v.active !== false);
 
-  const cheapestVehicle = VEHICLE_TYPES.reduce((min, v) => (v.basePrice < min.basePrice ? v : min), VEHICLE_TYPES[0]);
+  const cheapestVehicle = VEHICLE_TYPES.reduce(
+    (min, v) => (v.basePrice < min.basePrice ? v : min),
+    VEHICLE_TYPES[0],
+  );
+
+  // Auto-skip if only one service active
+  useEffect(() => {
+    if (SERVICES.length === 1) {
+      const next = new URLSearchParams(params);
+      next.set("service", SERVICES[0].tier);
+      navigate(`/shuttle/vehicle?${next.toString()}`, { replace: true });
+    }
+  }, [SERVICES.length, navigate, params]);
 
   const handlePick = (tier: string) => {
     const next = new URLSearchParams(params);
     next.set("service", tier);
+    // Auto-skip vehicle if only 1 active
+    if (VEHICLE_TYPES.length === 1) {
+      next.set("vehicle", VEHICLE_TYPES[0].id);
+      navigate(`/shuttle/book?${next.toString()}`);
+      return;
+    }
     navigate(`/shuttle/vehicle?${next.toString()}`);
   };
 
@@ -38,13 +59,18 @@ const ShuttleService = () => {
       mobileHeaderVariant="plain"
     >
       <div className="container max-w-2xl py-4 md:py-8 px-3 md:px-6 space-y-3">
+        <StepperHeader current="service" />
         <p className="text-sm text-muted-foreground px-1">
           Pilih kelas layanan sesuai kebutuhan perjalananmu ke {DESTINATION.short}.
         </p>
 
+        {SERVICES.length === 0 && (
+          <Card className="p-4 text-sm text-muted-foreground">Belum ada service aktif.</Card>
+        )}
+
         {SERVICES.map((s) => {
-          const Icon = tierIcon[s.tier];
-          const startPrice = calcPrice(cheapestVehicle, s);
+          const Icon = tierIcon[s.tier] ?? Gauge;
+          const startPrice = cheapestVehicle ? calcPrice(cheapestVehicle, s, rayon) : 0;
           const isExec = s.tier === "executive";
           return (
             <Card

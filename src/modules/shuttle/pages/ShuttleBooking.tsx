@@ -9,15 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2 } from "lucide-react";
 import { SeatMap } from "../components/SeatMap";
-import { getService, getVehicleType, calcPrice, mockSeatsAvailable, SERVICES, VEHICLE_TYPES } from "../data/services";
-import { getRayon, DESTINATION } from "../data/rayons";
+import { getService, getVehicleType, calcPrice, SERVICES, VEHICLE_TYPES } from "../data/services";
+import { getRayon, getDestination } from "../data/rayons";
 import { addBooking } from "../data/repository";
+import { getOccupiedSeats } from "../data/inventory";
+import { StepperHeader } from "@/shared/components/StepperHeader";
 
 const ShuttleBooking = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
   const rayon = getRayon(params.get("rayon") || "A");
+  const DESTINATION = getDestination();
   const service = getService(params.get("service") || "reguler") || SERVICES[0];
   const vehicle = getVehicleType(params.get("vehicle") || "hiace") || VEHICLE_TYPES[0];
   const pickup = params.get("pickup") || rayon?.pickupPoints[0] || "";
@@ -31,9 +34,14 @@ const ShuttleBooking = () => {
       : "-";
 
   const totalSeats = vehicle.totalSeats;
-  const seatsLeft = mockSeatsAvailable(vehicle.id, service.tier, totalSeats);
   const occupiedSeats = new Set(
-    Array.from({ length: totalSeats - seatsLeft }, (_, i) => ((i * 7) % totalSeats) + 1),
+    getOccupiedSeats({
+      date: dateStr,
+      time,
+      rayonId: rayon?.id || "A",
+      vehicleId: vehicle.id,
+      tier: service.tier,
+    }),
   );
 
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
@@ -71,7 +79,7 @@ const ShuttleBooking = () => {
     );
   };
 
-  const unitPrice = calcPrice(vehicle, service);
+  const unitPrice = calcPrice(vehicle, service, rayon);
   const total = unitPrice * pax;
 
   if (step === "success") {
@@ -135,7 +143,9 @@ const ShuttleBooking = () => {
       hideBottomNav
       mobileHeaderVariant="plain"
     >
-      <div className="container max-w-3xl py-4 md:py-8 px-3 md:px-6 grid md:grid-cols-[1fr_300px] gap-4">
+      <div className="container max-w-3xl py-4 md:py-8 px-3 md:px-6 space-y-4">
+        <StepperHeader current="seat" />
+        <div className="grid md:grid-cols-[1fr_300px] gap-4">
         <div className="space-y-4">
           <Card className="p-4">
             <h2 className="font-semibold mb-1">Pilih Kursi ({selectedSeats.length}/{pax})</h2>
@@ -176,6 +186,7 @@ const ShuttleBooking = () => {
             Lanjut
           </Button>
         </Card>
+        </div>
       </div>
     </ResponsiveLayout>
   );

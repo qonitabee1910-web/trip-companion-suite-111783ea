@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, AlertTriangle, Bus, Car, Caravan } from "lucide-react";
-import { calcPrice, getService, mockSeatsAvailable } from "../data/services";
-import { getRayon, DESTINATION } from "../data/rayons";
+import { calcPrice, getService } from "../data/services";
+import { getRayon, getDestination } from "../data/rayons";
 import { getServicesAll, getVehicleTypesAll } from "../data/repository";
+import { getAvailableCount } from "../data/inventory";
+import { StepperHeader } from "@/shared/components/StepperHeader";
 import hiaceImg from "@/assets/shuttle/base-hiace.png";
 
 const vehicleIcon = { hiace: Bus, suv: Car, minicar: Caravan } as const;
@@ -15,10 +17,14 @@ const ShuttleVehicle = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rayon = getRayon(params.get("rayon") || "A");
+  const DESTINATION = getDestination();
   const SERVICES = getServicesAll();
-  const VEHICLE_TYPES = getVehicleTypesAll();
+  const VEHICLE_TYPES = getVehicleTypesAll().filter((v) => v.active !== false);
   const service = getService(params.get("service") || "reguler") || SERVICES[0];
   const pax = Number(params.get("pax") || 1);
+  const date = params.get("date") || "";
+  const time = params.get("time") || "";
+  const rayonId = params.get("rayon") || "A";
 
   const handlePick = (vehicleId: string) => {
     const next = new URLSearchParams(params);
@@ -35,6 +41,7 @@ const ShuttleVehicle = () => {
       mobileHeaderVariant="plain"
     >
       <div className="container max-w-2xl py-4 md:py-8 px-3 md:px-6 space-y-3">
+        <StepperHeader current="vehicle" />
         <Card className="p-3 bg-muted/40 border-dashed">
           <p className="text-xs text-muted-foreground">
             Service: <span className="font-semibold text-foreground">{service.label}</span> • Penumpang:{" "}
@@ -42,10 +49,17 @@ const ShuttleVehicle = () => {
           </p>
         </Card>
 
+        {VEHICLE_TYPES.length === 0 && (
+          <Card className="p-4 text-sm text-muted-foreground">Belum ada kendaraan aktif.</Card>
+        )}
+
         {VEHICLE_TYPES.map((v) => {
           const Icon = vehicleIcon[v.id];
-          const total = calcPrice(v, service) * pax;
-          const seatsLeft = mockSeatsAvailable(v.id, service.tier, v.totalSeats);
+          const total = calcPrice(v, service, rayon) * pax;
+          const seatsLeft = getAvailableCount(
+            { date, time, rayonId, vehicleId: v.id, tier: service.tier },
+            v.totalSeats,
+          );
           const lowSeats = seatsLeft / v.totalSeats < 0.3;
           const notEnough = seatsLeft < pax;
 
