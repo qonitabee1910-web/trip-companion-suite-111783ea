@@ -43,7 +43,7 @@ const AdminInventory = () => {
   const [date, setDate] = useState<Date>(startOfToday());
   const [time, setTime] = useState(times[0] ?? "06:00");
   const [rayonId, setRayonId] = useState(rayons[0]?.id ?? "A");
-  const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "hiace");
+  const [vehicleId, setVehicleId] = useState<string>(vehicles[0]?.id ?? "hiace");
   const [tier, setTier] = useState<string>(services[0]?.tier ?? "reguler");
   const [tick, setTick] = useState(0); // force re-render after toggle
 
