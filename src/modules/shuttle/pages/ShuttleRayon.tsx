@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { DEPART_TIMES, DESTINATION, getRayon } from "../data/rayons";
+import { DESTINATION, getRayon } from "../data/rayons";
+import { getDepartTimes } from "../data/repository";
 import { MapPin, Plane, Users, Minus, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const ShuttleRayon = () => {

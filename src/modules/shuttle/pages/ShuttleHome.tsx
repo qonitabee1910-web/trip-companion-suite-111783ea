@@ -3,7 +3,8 @@ import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plane, MapPin, ArrowRight } from "lucide-react";
-import { RAYONS, DESTINATION } from "../data/rayons";
+import { DESTINATION } from "../data/rayons";
+import { getRayons } from "../data/repository";
 
 const rayonAccent: Record<string, string> = {
   A: "from-primary/15 to-primary/5 border-primary/30 text-primary",
