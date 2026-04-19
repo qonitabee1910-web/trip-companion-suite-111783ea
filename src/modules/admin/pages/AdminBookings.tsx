@@ -165,7 +165,11 @@ const AdminBookings = () => {
                 {filtered.map((b) => {
                   const d = parseISO(b.date);
                   return (
-                    <TableRow key={b.id}>
+                    <TableRow
+                      key={b.id}
+                      className="cursor-pointer hover:bg-muted/40"
+                      onClick={() => setDetailBooking(b)}
+                    >
                       <TableCell className="font-mono text-xs">{b.id}</TableCell>
                       <TableCell className="text-xs">
                         <div className="font-medium">{b.customerName}</div>
@@ -188,25 +192,34 @@ const AdminBookings = () => {
                           {b.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Select value={b.status} onValueChange={(v) => handleStatus(b.id, v as BookingStatus)}>
-                          <SelectTrigger className="w-[120px] h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="done">Done</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(b.id)}
-                          className="ml-1"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDetailBooking(b)}
+                            title="Lihat detail"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Select value={b.status} onValueChange={(v) => handleStatus(b.id, v as BookingStatus)}>
+                            <SelectTrigger className="w-[120px] h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="done">Done</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(b.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -216,6 +229,12 @@ const AdminBookings = () => {
           </div>
         </Card>
       </div>
+
+      <BookingDetailDrawer
+        booking={detailBooking}
+        open={!!detailBooking}
+        onOpenChange={(o) => !o && setDetailBooking(null)}
+      />
     </AdminLayout>
   );
 };
