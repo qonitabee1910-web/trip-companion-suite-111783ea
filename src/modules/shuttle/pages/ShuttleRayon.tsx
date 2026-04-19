@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { DESTINATION, getRayon } from "../data/rayons";
-import { getDepartTimes } from "../data/repository";
+import { getRayon, getDestination, getContent } from "../data/rayons";
+import { getDepartTimes, getServicesAll } from "../data/repository";
+import { StepperHeader } from "@/shared/components/StepperHeader";
 import { MapPin, Plane, Users, Minus, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const ShuttleRayon = () => {
@@ -18,6 +19,9 @@ const ShuttleRayon = () => {
   const navigate = useNavigate();
   const rayon = getRayon(id);
   const DEPART_TIMES = getDepartTimes();
+  const DESTINATION = getDestination();
+  const content = getContent();
+  const activeServices = getServicesAll().filter((s) => s.active !== false);
   const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
   const [date, setDate] = useState<Date>(startOfToday());
   const [time, setTime] = useState(DEPART_TIMES[1] ?? DEPART_TIMES[0] ?? "06:00");
@@ -39,6 +43,12 @@ const ShuttleRayon = () => {
       time,
       pax: String(pax),
     });
+    // Auto-skip service step if only 1 active service
+    if (activeServices.length === 1) {
+      params.set("service", activeServices[0].tier);
+      navigate(`/shuttle/vehicle?${params.toString()}`);
+      return;
+    }
     navigate(`/shuttle/service?${params.toString()}`);
   };
 
