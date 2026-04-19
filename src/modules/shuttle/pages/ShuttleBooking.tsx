@@ -11,6 +11,7 @@ import { CheckCircle2 } from "lucide-react";
 import { SeatMap } from "../components/SeatMap";
 import { getService, getVehicleType, calcPrice, mockSeatsAvailable, SERVICES, VEHICLE_TYPES } from "../data/services";
 import { getRayon, DESTINATION } from "../data/rayons";
+import { addBooking } from "../data/repository";
 
 const ShuttleBooking = () => {
   const [params] = useSearchParams();
@@ -38,6 +39,30 @@ const ShuttleBooking = () => {
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
   const [step, setStep] = useState<"seat" | "form" | "success">("seat");
   const [form, setForm] = useState({ name: "", phone: "" });
+  const [bookingId, setBookingId] = useState<string>("");
+
+  const handlePay = () => {
+    if (!form.name || !form.phone) return;
+    const created = addBooking({
+      rayonId: rayon?.id || "A",
+      rayonName: `${rayon?.name ?? ""} (${rayon?.area ?? ""})`,
+      pickup,
+      date: dateStr,
+      time,
+      vehicleId: vehicle.id,
+      vehicleLabel: `${vehicle.label} • ${vehicle.vehicleName}`,
+      serviceTier: service.tier,
+      serviceLabel: service.label,
+      seats: selectedSeats,
+      pax,
+      unitPrice,
+      totalPrice: total,
+      customerName: form.name,
+      customerPhone: form.phone,
+    });
+    setBookingId(created.id);
+    setStep("success");
+  };
 
   const toggleSeat = (n: number) => {
     if (occupiedSeats.has(n)) return;
