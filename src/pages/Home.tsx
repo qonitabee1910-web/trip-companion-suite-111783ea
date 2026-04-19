@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { ModuleCard } from "@/shared/components/ModuleCard";
 import { MODULES } from "@/shared/modules";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, MapPin, Bell } from "lucide-react";
+import { Search, MapPin, Bell, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -120,6 +121,14 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      <div className="container pb-8 flex justify-center">
+        <Button asChild variant="ghost" size="sm" className="text-xs text-muted-foreground">
+          <Link to="/admin">
+            <Shield className="h-3.5 w-3.5" /> Admin Dashboard
+          </Link>
+        </Button>
+      </div>
     </ResponsiveLayout>
   );
 };

@@ -9,16 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { DEPART_TIMES, DESTINATION, getRayon } from "../data/rayons";
+import { DESTINATION, getRayon } from "../data/rayons";
+import { getDepartTimes } from "../data/repository";
 import { MapPin, Plane, Users, Minus, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const ShuttleRayon = () => {
   const { id = "A" } = useParams();
   const navigate = useNavigate();
   const rayon = getRayon(id);
+  const DEPART_TIMES = getDepartTimes();
   const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
   const [date, setDate] = useState<Date>(startOfToday());
-  const [time, setTime] = useState(DEPART_TIMES[1]);
+  const [time, setTime] = useState(DEPART_TIMES[1] ?? DEPART_TIMES[0] ?? "06:00");
   const [pax, setPax] = useState(1);
 
   if (!rayon) {

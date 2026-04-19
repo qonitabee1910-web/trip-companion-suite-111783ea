@@ -11,6 +11,7 @@ import { CheckCircle2 } from "lucide-react";
 import { SeatMap } from "../components/SeatMap";
 import { getService, getVehicleType, calcPrice, mockSeatsAvailable, SERVICES, VEHICLE_TYPES } from "../data/services";
 import { getRayon, DESTINATION } from "../data/rayons";
+import { addBooking } from "../data/repository";
 
 const ShuttleBooking = () => {
   const [params] = useSearchParams();
@@ -38,6 +39,30 @@ const ShuttleBooking = () => {
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
   const [step, setStep] = useState<"seat" | "form" | "success">("seat");
   const [form, setForm] = useState({ name: "", phone: "" });
+  const [bookingId, setBookingId] = useState<string>("");
+
+  const handlePay = () => {
+    if (!form.name || !form.phone) return;
+    const created = addBooking({
+      rayonId: rayon?.id || "A",
+      rayonName: `${rayon?.name ?? ""} (${rayon?.area ?? ""})`,
+      pickup,
+      date: dateStr,
+      time,
+      vehicleId: vehicle.id,
+      vehicleLabel: `${vehicle.label} • ${vehicle.vehicleName}`,
+      serviceTier: service.tier,
+      serviceLabel: service.label,
+      seats: selectedSeats,
+      pax,
+      unitPrice,
+      totalPrice: total,
+      customerName: form.name,
+      customerPhone: form.phone,
+    });
+    setBookingId(created.id);
+    setStep("success");
+  };
 
   const toggleSeat = (n: number) => {
     if (occupiedSeats.has(n)) return;
@@ -57,7 +82,7 @@ const ShuttleBooking = () => {
             <CheckCircle2 className="h-16 w-16 text-success mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-2">Tiket Dikonfirmasi!</h1>
             <p className="text-muted-foreground mb-6 font-mono font-bold">
-              TRV-S{Date.now().toString().slice(-7)}
+              {bookingId || `TRV-S${Date.now().toString().slice(-7)}`}
             </p>
             <div className="text-left bg-muted/50 rounded-lg p-4 space-y-2 mb-6 text-sm">
               <div className="flex justify-between"><span>Rayon</span><span className="font-medium">{rayon?.name} ({rayon?.area})</span></div>
@@ -92,7 +117,7 @@ const ShuttleBooking = () => {
               <Input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="mt-1" />
             </div>
             <Button
-              onClick={() => form.name && form.phone && setStep("success")}
+              onClick={handlePay}
               className="w-full bg-accent hover:bg-accent/90 text-accent-foreground h-12 font-semibold"
             >
               Bayar Rp{total.toLocaleString("id-ID")}

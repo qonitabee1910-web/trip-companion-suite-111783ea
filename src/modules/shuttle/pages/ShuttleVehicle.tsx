@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, AlertTriangle, Bus, Car, Caravan } from "lucide-react";
-import { SERVICES, VEHICLE_TYPES, calcPrice, getService, mockSeatsAvailable } from "../data/services";
+import { calcPrice, getService, mockSeatsAvailable } from "../data/services";
 import { getRayon, DESTINATION } from "../data/rayons";
+import { getServicesAll, getVehicleTypesAll } from "../data/repository";
 import hiaceImg from "@/assets/shuttle/base-hiace.png";
 
 const vehicleIcon = { hiace: Bus, suv: Car, minicar: Caravan } as const;
@@ -14,6 +15,8 @@ const ShuttleVehicle = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const rayon = getRayon(params.get("rayon") || "A");
+  const SERVICES = getServicesAll();
+  const VEHICLE_TYPES = getVehicleTypesAll();
   const service = getService(params.get("service") || "reguler") || SERVICES[0];
   const pax = Number(params.get("pax") || 1);
 

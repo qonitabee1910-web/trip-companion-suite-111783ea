@@ -21,6 +21,12 @@ import ShuttleVehicle from "./modules/shuttle/pages/ShuttleVehicle";
 
 import RideHome from "./modules/ride/pages/RideHome";
 
+import AdminDashboard from "./modules/admin/pages/AdminDashboard";
+import AdminRayons from "./modules/admin/pages/AdminRayons";
+import AdminServices from "./modules/admin/pages/AdminServices";
+import AdminVehicles from "./modules/admin/pages/AdminVehicles";
+import AdminBookings from "./modules/admin/pages/AdminBookings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -47,6 +53,12 @@ const App = () => (
           <Route path="/shuttle/:id/book" element={<ShuttleBooking />} />
 
           <Route path="/ride" element={<RideHome />} />
+
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/shuttle/rayons" element={<AdminRayons />} />
+          <Route path="/admin/shuttle/services" element={<AdminServices />} />
+          <Route path="/admin/shuttle/vehicles" element={<AdminVehicles />} />
+          <Route path="/admin/shuttle/bookings" element={<AdminBookings />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
