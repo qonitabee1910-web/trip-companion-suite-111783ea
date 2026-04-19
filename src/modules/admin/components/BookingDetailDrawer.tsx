@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Printer, User, Phone, MapPin, Calendar, Clock, Ticket, Armchair } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { SeatMap } from "@/modules/shuttle/components/SeatMap";
 import type { ShuttleBooking, BookingStatus } from "@/modules/shuttle/types/booking";
 import type { ServiceTier } from "@/modules/shuttle/data/seatLayouts";
@@ -72,6 +73,22 @@ export function BookingDetailDrawer({ booking, open, onOpenChange }: Props) {
             <h1 className="text-2xl font-bold">E-TICKET SHUTTLE</h1>
             <p className="font-mono text-sm">{booking.id}</p>
           </div>
+
+          {/* QR code untuk validasi */}
+          <section className="flex flex-col items-center gap-2 rounded-lg border bg-card p-4">
+            <div className="rounded-md bg-white p-2">
+              <QRCodeSVG
+                value={booking.id}
+                size={140}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Tunjukkan QR ini ke petugas untuk validasi
+            </p>
+            <p className="font-mono text-sm font-semibold tracking-wider">{booking.id}</p>
+          </section>
 
           {/* Passenger info */}
           <section className="space-y-2">
