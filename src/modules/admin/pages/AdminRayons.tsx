@@ -183,6 +183,7 @@ const AdminRayons = () => {
                   <TableHead>Area</TableHead>
                   <TableHead className="text-center">Titik</TableHead>
                   <TableHead className="text-center">Estimasi</TableHead>
+                  <TableHead className="text-right">Surcharge</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -194,6 +195,9 @@ const AdminRayons = () => {
                     <TableCell>{r.area}</TableCell>
                     <TableCell className="text-center">{r.pickupPoints.length}</TableCell>
                     <TableCell className="text-center">{r.estimateMin}m</TableCell>
+                    <TableCell className="text-right">
+                      {r.surcharge ? `+Rp${r.surcharge.toLocaleString("id-ID")}` : "-"}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => setEditing({ index: idx, data: r })}>
                         <Edit className="h-4 w-4" />
@@ -274,7 +278,18 @@ const AdminRayons = () => {
                 </div>
               </div>
               <div>
-                <Label>Nama</Label>
+                <Label>Surcharge (Rp, opsional)</Label>
+                <Input
+                  type="number"
+                  value={editing.data.surcharge ?? 0}
+                  onChange={(e) =>
+                    setEditing({
+                      ...editing,
+                      data: { ...editing.data, surcharge: Number(e.target.value) || 0 },
+                    })
+                  }
+                />
+              </div>
                 <Input
                   value={editing.data.name}
                   onChange={(e) =>
