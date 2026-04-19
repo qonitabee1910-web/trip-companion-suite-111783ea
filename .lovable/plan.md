@@ -1,54 +1,126 @@
 
-# Integrasi Seat Editor ke Admin Dashboard
+# Plan: Sentralisasi Seluruh User Shuttle Logic ke Admin Dashboard
 
-## Analisis Struktur Saat Ini
+## Analisis User Flow Saat Ini
 
-**Yang sudah ada:**
-- `SeatLayoutEditor` standalone di `/shuttle/seat-editor` (full-page, header sendiri, link kembali ke `/shuttle`).
-- 9 layout key kombinasi: `{HIACE,SUV,MINICAR} × {REGULER,SEMI,EXEC}` — disimpan via `LAYOUT_STORAGE_KEY()` di localStorage, terpisah dari repository admin.
-- `AdminVehicles` & `AdminServices` mengelola data di repository (`shuttle-admin:vehicles`, `shuttle-admin:services`) — **tidak terhubung** dengan seat layouts.
-- Link "Edit denah" di `AdminVehicles` & sidebar membuka tab baru ke editor standalone — UX terputus.
+**Flow user (5 langkah):**
+```
+ShuttleHome → ShuttleRayon → ShuttleService → ShuttleVehicle → ShuttleBooking
+   (rayon)     (pickup,jam,    (tier)         (kendaraan)      (pilih kursi
+                tgl, pax)                                       + form + bayar)
+```
 
-**Masalah sinkronisasi:**
-1. Admin ubah `totalSeats` di vehicle (mis. HiAce 12 → 10), tapi seat layout `HIACE_REGULER` tetap punya 12 kursi tersimpan → mismatch dengan tampilan user (resolver `getSeatLayout` auto-slice/extend kursi tanpa peringatan).
-2. Editor tidak tahu service tier mana yang aktif/dinonaktifkan admin.
-3. Editor terpisah dari konteks admin (tidak ada AdminLayout, sidebar hilang).
+**Yang sudah bisa di-admin:**
+- ✅ Rayon, titik jemput, jam berangkat (`AdminRayons`)
+- ✅ Service tier + harga multiplier (`AdminServices`)
+- ✅ Kendaraan + kapasitas + base price (`AdminVehicles`)
+- ✅ Seat layout per kombinasi (`AdminSeatEditor`)
+- ✅ Booking (`AdminBookings`) + Scan QR (`AdminScan`)
 
-## Solusi
+**Yang BELUM bisa di-admin (hardcoded di code):**
+1. **DESTINATION** (`KNO Airport`) — hardcoded `rayons.ts`. Tidak bisa ganti tujuan/multi-tujuan.
+2. **Hero & branding ShuttleHome** — judul, subtitle, gradient.
+3. **Mock occupied seats** — `mockSeatsAvailable()` deterministik per kombinasi, tidak baca booking riil. Akibatnya admin tidak punya kontrol kursi yang sudah terjual untuk slot tertentu.
+4. **Kapasitas pax max** (hardcoded 12 di stepper `ShuttleRayon`).
+5. **Service yang dinonaktifkan/vehicle dihapus** masih dipakai user — belum ada flag `active` & filter.
+6. **Tarif final** — multiplier × base, tidak ada per-rayon surcharge / promo.
+7. **Cara pesan / instruksi** copy di footer ShuttleHome — hardcoded.
 
-### 1. Embed Seat Editor di Admin Layout
-**NEW** `src/modules/admin/pages/AdminSeatEditor.tsx`
-- Wrapper tipis: render `<AdminLayout title="Seat Layout">` + komponen editor inti.
-- Refactor `SeatLayoutEditor.tsx` → ekstrak isi `<main>` jadi komponen `SeatEditorPanel.tsx` (reusable) yang menerima prop `initialKey?: LayoutKey`. Halaman lama `/shuttle/seat-editor` tetap pakai komponen ini (full-page mode) untuk backward-compat.
-- Route baru: `/admin/shuttle/seat-editor` di `App.tsx`.
+**Masalah UX admin saat ini:**
+- 7 menu sidebar terasa flat — tidak ada grouping logis (Setup vs Operasional vs Konten).
+- Dashboard hanya angka — tidak ada quick action ke setup yang belum lengkap.
+- Tidak ada indikator "data belum sinkron" (mis. seat layout mismatch capacity).
 
-### 2. Sinkronisasi Vehicle × Service → Seat Layout
-**Selector pintar di SeatEditorPanel:**
-- Selector lama (1 dropdown 9 kombinasi) diganti **2 dropdown bersisian**: Kendaraan (dari `getVehicleTypesAll()`) × Service Tier (dari `getServicesAll()`) → otomatis `buildLayoutKey()`.
-- Tampilkan badge info dari repo: kapasitas vehicle (`totalSeats`), label service, harga akhir (vehicle.basePrice × service.multiplier).
-- **Validasi mismatch**: Jika `config.seats.length !== vehicle.totalSeats` → tampilkan banner peringatan kuning + tombol **"Sinkronkan ke kapasitas (X kursi)"** yang auto add/remove kursi sampai sesuai.
-- Service yang dinonaktifkan / vehicle yang dihapus admin → disabled di dropdown.
+---
 
-### 3. Cross-link 2 Arah
-- `AdminVehicles`: tombol "Edit denah" untuk **tiap kombinasi service** (3 chip: Reguler / Semi / Exec) → link internal `/admin/shuttle/seat-editor?vehicle={id}&tier={tier}` (open di tab yang sama, bukan tab baru).
-- `AdminServices`: tambah link "Atur denah kursi service ini" → `/admin/shuttle/seat-editor?tier={tier}`.
-- `AdminSidebar`: ganti link Seat Layout dari external (`/shuttle/seat-editor` target=_blank) → internal `/admin/shuttle/seat-editor`.
+## Solusi: Restrukturisasi + Lengkapi Coverage Admin
 
-### 4. AdminSeatEditor Membaca Query Params
-- Parse `?vehicle=hiace&tier=executive` → set initial `LayoutKey` ke `HIACE_EXEC`.
+### A. Reorganisasi Sidebar dengan Grouping
+Pisah jadi 3 grup biar tidak membingungkan:
 
-## File Changes
+```
+KONTEN & BRANDING
+  • Beranda Shuttle      (NEW — atur DESTINATION + hero copy)
+
+SETUP LAYANAN
+  • Rayon & Jam
+  • Service              (+toggle aktif)
+  • Kendaraan            (+toggle aktif)
+  • Seat Layout
+
+OPERASIONAL
+  • Dashboard
+  • Booking
+  • Scan Tiket
+  • Inventori Kursi      (NEW — kelola occupied per slot)
+```
+
+### B. Halaman Baru: `AdminShuttleContent`
+Satu halaman atur konten user-facing:
+- **Tujuan (DESTINATION)**: code, nama panjang, nama pendek. Disimpan di `shuttle-admin:destination`.
+- **Hero ShuttleHome**: judul (default "Shuttle ke KNO"), subtitle, label tujuan tetap.
+- **Footer instruksi**: text "Cara pesan: ..." editable.
+- **Pax max** per booking (default 12).
+- **Live preview** di samping form — render mini-card mirip ShuttleHome.
+
+Refactor: `DESTINATION` di `rayons.ts` jadi `getDestination()` yang baca dari repo, fallback default. Update `ShuttleHome/Rayon/Service/Vehicle/Booking` untuk pakai `getDestination()`.
+
+### C. Halaman Baru: `AdminInventory` (Kelola Kursi Terjual per Slot)
+Menggantikan `mockSeatsAvailable()` random:
+- Pilih **tanggal + jam + rayon + vehicle + service** → tampilkan SeatMap interaktif.
+- Admin bisa **block/unblock kursi manual** (mis. untuk maintenance, VIP, atau penjualan offline).
+- Kursi yang sudah dipesan via booking otomatis tampil terisi (warna beda, tidak bisa diunblock).
+- Disimpan di `shuttle-admin:inventory` dengan key `{date}_{time}_{rayonId}_{vehicleId}_{tier}` → array nomor kursi diblok.
+
+Refactor `ShuttleBooking.tsx`: ganti `mockSeatsAvailable` & `occupiedSeats` dengan `getOccupiedSeats(slot)` yang gabung **booking riil dari `getBookings()` (filter slot match)** + **manual block dari inventory**.
+
+### D. Toggle Aktif untuk Service & Vehicle
+- Tambah field `active: boolean` di `ServiceConfig` & `VehicleType` (default `true`).
+- `AdminServices` & `AdminVehicles` tambah toggle switch per row.
+- `ShuttleService` & `ShuttleVehicle` filter `.filter(s => s.active !== false)`.
+- Jika hanya 1 service aktif → auto-skip halaman service. Sama untuk vehicle.
+
+### E. Per-Rayon Surcharge (Opsional, Tarif Lebih Realistis)
+Tambah `surcharge: number` (default 0) di `Rayon`. Edit di `AdminRayons`. `calcPrice` jadi `(base × multiplier) + rayon.surcharge`. Update `ShuttleService` & `ShuttleVehicle` & `ShuttleBooking` untuk passing rayon ke `calcPrice`.
+
+### F. Dashboard Admin Diperkaya
+- **Setup completeness card**: Checklist (Destination ✓, ≥1 Rayon ✓, ≥1 Service aktif ✓, ≥1 Vehicle aktif ✓, semua seat layout match capacity ✓). Jika belum lengkap → CTA langsung ke halaman setup.
+- **Quick actions**: tombol "Tambah Rayon", "Atur Konten", "Buka Editor Kursi".
+- **Mismatch warning**: jumlah kombinasi vehicle×service yang seat layoutnya tidak sinkron capacity.
+
+### G. Improve Flow User (Auto-skip & Validasi)
+- Jika hanya 1 service aktif → `ShuttleRayon` tombol "Lanjut" langsung lompat ke `/shuttle/vehicle`.
+- Jika hanya 1 vehicle aktif → `ShuttleService` langsung redirect ke `/shuttle/book`.
+- Tambah **breadcrumb stepper** di header tiap halaman shuttle: `Rayon › Jadwal › Service › Kendaraan › Kursi` biar user tahu ada di langkah mana.
+
+---
+
+## File Changes Ringkas
 
 **NEW:**
-- `src/modules/admin/pages/AdminSeatEditor.tsx`
-- `src/modules/shuttle/components/SeatEditorPanel.tsx` (extracted from SeatLayoutEditor)
+- `src/modules/admin/pages/AdminShuttleContent.tsx` — atur DESTINATION + hero + footer copy + pax max
+- `src/modules/admin/pages/AdminInventory.tsx` — kelola kursi terjual/blocked per slot
+- `src/shared/components/StepperHeader.tsx` — breadcrumb stepper user shuttle
+- `src/modules/shuttle/data/inventory.ts` — helper getOccupied/blockSeat/unblockSeat
 
 **EDIT:**
-- `src/modules/shuttle/pages/SeatLayoutEditor.tsx` → tipis, hanya wrap `<SeatEditorPanel fullPage />`
-- `src/modules/admin/components/AdminSidebar.tsx` → link internal
-- `src/modules/admin/pages/AdminVehicles.tsx` → 3 tombol per service tier dengan deep-link
-- `src/modules/admin/pages/AdminServices.tsx` → tombol link denah
-- `src/App.tsx` → tambah route `/admin/shuttle/seat-editor`
+- `src/modules/shuttle/data/rayons.ts` — `getDestination()` baca repo + tambah `surcharge` di Rayon
+- `src/modules/shuttle/data/services.ts` — tambah `active` field; `calcPrice(vehicle, service, rayon?)`
+- `src/modules/shuttle/data/repository.ts` — getter/setter untuk destination, hero copy, inventory
+- `src/modules/shuttle/pages/ShuttleHome.tsx` — pakai konten dari repo
+- `src/modules/shuttle/pages/ShuttleRayon.tsx` — pax max dari repo + auto-skip
+- `src/modules/shuttle/pages/ShuttleService.tsx` — filter aktif + auto-skip + stepper
+- `src/modules/shuttle/pages/ShuttleVehicle.tsx` — filter aktif + stepper + occupied riil
+- `src/modules/shuttle/pages/ShuttleBooking.tsx` — `getOccupiedSeats(slot)` gabung booking + block
+- `src/modules/admin/pages/AdminServices.tsx` — toggle aktif
+- `src/modules/admin/pages/AdminVehicles.tsx` — toggle aktif
+- `src/modules/admin/pages/AdminRayons.tsx` — input surcharge
+- `src/modules/admin/pages/AdminDashboard.tsx` — setup checklist + quick actions + mismatch warning
+- `src/modules/admin/components/AdminSidebar.tsx` — restrukturisasi grouping
+- `src/App.tsx` — 2 route baru
 
-## Hasil
-Admin membuka Seat Layout dari sidebar → tetap di dashboard (sidebar/header utuh). Pilih HiAce + Executive dari 2 dropdown, lihat info kapasitas/harga real-time dari repo. Jika kapasitas vehicle diubah di halaman Kendaraan, editor langsung kasih banner sinkronkan. Klik "Edit denah" di Vehicle/Service langsung melompat ke editor dengan kombinasi yang benar.
+---
+
+## Hasil Akhir
+
+Admin punya **kontrol penuh** atas semua yang dilihat & dialami user shuttle: branding, tujuan, rayon/jam/tarif, service & kendaraan (termasuk on/off), denah kursi, **dan stok kursi per slot**. Sidebar dirapikan jadi 3 grup (Konten, Setup, Operasional) sehingga alur kerja admin jelas: **setup sekali → kelola operasional harian**. User flow lebih cepat (auto-skip kalau hanya 1 pilihan) dan jelas (stepper breadcrumb). Dashboard memandu admin lewat checklist setup, sehingga tidak ada lagi data hardcoded yang tertinggal.
