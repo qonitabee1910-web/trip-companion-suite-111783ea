@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { format, parseISO, isValid } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,12 @@ const ShuttleBooking = () => {
   const pickup = params.get("pickup") || rayon?.pickupPoints[0] || "";
   const time = params.get("time") || "06:00";
   const pax = Number(params.get("pax") || 1);
+  const dateStr = params.get("date") || "";
+  const parsedDate = dateStr ? parseISO(dateStr) : null;
+  const dateLabel =
+    parsedDate && isValid(parsedDate)
+      ? format(parsedDate, "EEE, d MMM yyyy", { locale: localeId })
+      : "-";
 
   const totalSeats = vehicle.totalSeats;
   const seatsLeft = mockSeatsAvailable(vehicle.id, service.tier, totalSeats);
@@ -56,6 +64,7 @@ const ShuttleBooking = () => {
               <div className="flex justify-between"><span>Tujuan</span><span className="font-medium">{DESTINATION.short}</span></div>
               <div className="flex justify-between"><span>Service</span><span className="font-medium">{service.label}</span></div>
               <div className="flex justify-between"><span>Kendaraan</span><span className="font-medium">{vehicle.label} • {vehicle.vehicleName}</span></div>
+              <div className="flex justify-between"><span>Tanggal</span><span className="font-medium">{dateLabel}</span></div>
               <div className="flex justify-between"><span>Berangkat</span><span className="font-medium">{time}</span></div>
               <div className="flex justify-between"><span>Jemput</span><span className="font-medium">{pickup}</span></div>
               <div className="flex justify-between"><span>Kursi</span><span className="font-medium">{selectedSeats.join(", ")}</span></div>
@@ -128,6 +137,7 @@ const ShuttleBooking = () => {
             <div className="flex justify-between"><span className="text-muted-foreground">Tujuan</span><span className="font-medium">{DESTINATION.short}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Service</span><span className="font-medium">{service.label}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Kendaraan</span><span className="font-medium">{vehicle.label}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Tanggal</span><span className="font-medium">{dateLabel}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Berangkat</span><span className="font-medium">{time}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Penumpang</span><span className="font-medium">{pax}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Kursi</span><span className="font-medium">{selectedSeats.join(", ") || "-"}</span></div>

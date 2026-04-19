@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { format, startOfToday } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 import { ResponsiveLayout } from "@/shared/components/ResponsiveLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { DEPART_TIMES, DESTINATION, getRayon } from "../data/rayons";
-import { MapPin, Plane, Users, Minus, Plus, Clock } from "lucide-react";
+import { MapPin, Plane, Users, Minus, Plus, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const ShuttleRayon = () => {
   const { id = "A" } = useParams();
   const navigate = useNavigate();
   const rayon = getRayon(id);
   const [pickup, setPickup] = useState(rayon?.pickupPoints[0] || "");
+  const [date, setDate] = useState<Date>(startOfToday());
   const [time, setTime] = useState(DEPART_TIMES[1]);
   const [pax, setPax] = useState(1);
 
@@ -24,7 +30,13 @@ const ShuttleRayon = () => {
   }
 
   const handleNext = () => {
-    const params = new URLSearchParams({ rayon: rayon.id, pickup, time, pax: String(pax) });
+    const params = new URLSearchParams({
+      rayon: rayon.id,
+      pickup,
+      date: format(date, "yyyy-MM-dd"),
+      time,
+      pax: String(pax),
+    });
     navigate(`/shuttle/service?${params.toString()}`);
   };
 
@@ -76,6 +88,37 @@ const ShuttleRayon = () => {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" /> Tanggal Berangkat
+            </h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-11",
+                    !date && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, "EEEE, d MMM yyyy", { locale: localeId })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => d && setDate(d)}
+                  disabled={(d) => d < startOfToday()}
+                  initialFocus
+                  locale={localeId}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>
