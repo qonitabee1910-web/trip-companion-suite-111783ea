@@ -186,6 +186,7 @@ const ShuttleBooking = () => {
             Lanjut
           </Button>
         </Card>
+        </div>
       </div>
     </ResponsiveLayout>
   );
