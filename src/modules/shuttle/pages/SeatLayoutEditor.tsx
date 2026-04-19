@@ -18,50 +18,44 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { DraggableSeat } from "../components/DraggableSeat";
 import {
-  HIACE_LAYOUT,
-  ELF_LAYOUT,
-  PREMIO_LAYOUT,
+  LAYOUT_PRESETS,
+  LAYOUT_LABELS,
+  LAYOUT_KEYS,
   saveLayoutToStorage,
   loadLayoutFromStorage,
   clearLayoutFromStorage,
   hasStoredLayout,
   type SeatLayoutConfig,
   type SeatPosition,
-  type VehicleKey,
+  type LayoutKey,
 } from "../data/seatLayouts";
 
-const PRESETS: Record<VehicleKey, SeatLayoutConfig> = {
-  HIACE: HIACE_LAYOUT,
-  ELF: ELF_LAYOUT,
-  PREMIO: PREMIO_LAYOUT,
-};
-
 export default function SeatLayoutEditor() {
-  const [vehicleKey, setVehicleKey] = useState<VehicleKey>("HIACE");
+  const [layoutKey, setLayoutKey] = useState<LayoutKey>("HIACE_REGULER");
   const [config, setConfig] = useState<SeatLayoutConfig>(() => {
-    const stored = loadLayoutFromStorage("HIACE");
-    const base = stored || PRESETS.HIACE;
+    const stored = loadLayoutFromStorage("HIACE_REGULER");
+    const base = stored || LAYOUT_PRESETS.HIACE_REGULER;
     return { ...base, seats: base.seats.map((s) => ({ ...s })) };
   });
   const [selectedNum, setSelectedNum] = useState<number | null>(null);
   const [snap, setSnap] = useState(false);
   const [customImage, setCustomImage] = useState<string | null>(null);
-  const [hasSaved, setHasSaved] = useState(() => hasStoredLayout("HIACE"));
+  const [hasSaved, setHasSaved] = useState(() => hasStoredLayout("HIACE_REGULER"));
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const loadPreset = (key: VehicleKey) => {
-    setVehicleKey(key);
+  const loadPreset = (key: LayoutKey) => {
+    setLayoutKey(key);
     const stored = loadLayoutFromStorage(key);
-    const base = stored || PRESETS[key];
+    const base = stored || LAYOUT_PRESETS[key];
     setConfig({ ...base, seats: base.seats.map((s) => ({ ...s })) });
-    const isCustomImg = !!stored?.image && stored.image !== PRESETS[key].image;
+    const isCustomImg = !!stored?.image && stored.image !== LAYOUT_PRESETS[key].image;
     setCustomImage(isCustomImg ? stored!.image : null);
     setSelectedNum(null);
     setHasSaved(hasStoredLayout(key));
   };
 
   const resetToPreset = () => {
-    const p = PRESETS[vehicleKey];
+    const p = LAYOUT_PRESETS[layoutKey];
     setConfig({ ...p, seats: p.seats.map((s) => ({ ...s })) });
     setCustomImage(null);
     setSelectedNum(null);
