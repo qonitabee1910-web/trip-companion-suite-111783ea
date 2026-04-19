@@ -74,6 +74,22 @@ export function BookingDetailDrawer({ booking, open, onOpenChange }: Props) {
             <p className="font-mono text-sm">{booking.id}</p>
           </div>
 
+          {/* QR code untuk validasi */}
+          <section className="flex flex-col items-center gap-2 rounded-lg border bg-card p-4">
+            <div className="rounded-md bg-white p-2">
+              <QRCodeSVG
+                value={booking.id}
+                size={140}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Tunjukkan QR ini ke petugas untuk validasi
+            </p>
+            <p className="font-mono text-sm font-semibold tracking-wider">{booking.id}</p>
+          </section>
+
           {/* Passenger info */}
           <section className="space-y-2">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
