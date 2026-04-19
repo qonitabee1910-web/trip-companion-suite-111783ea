@@ -115,6 +115,7 @@ const ShuttleBooking = () => {
               selected={selectedSeats}
               maxSelect={pax}
               onToggle={toggleSeat}
+              tier={service.tier as "reguler" | "semi-executive" | "executive"}
             />
           </Card>
         </div>
