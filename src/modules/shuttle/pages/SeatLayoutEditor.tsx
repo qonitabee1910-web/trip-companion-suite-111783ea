@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { DraggableSeat } from "../components/DraggableSeat";
 import {
   LAYOUT_PRESETS,
@@ -25,6 +37,7 @@ import {
   loadLayoutFromStorage,
   clearLayoutFromStorage,
   hasStoredLayout,
+  DEFAULT_SEAT_SIZE,
   type SeatLayoutConfig,
   type SeatPosition,
   type LayoutKey,
@@ -97,8 +110,19 @@ export default function SeatLayoutEditor() {
   };
 
   const removeSeat = (num: number) => {
-    setConfig((c) => ({ ...c, seats: c.seats.filter((s) => s.num !== num) }));
+    setConfig((c) => {
+      const filtered = c.seats.filter((s) => s.num !== num);
+      // Renumber sequentially so nomor selalu 1..N
+      const renum = filtered.map((s, i) => ({ ...s, num: i + 1 }));
+      return { ...c, seats: renum };
+    });
     setSelectedNum(null);
+  };
+
+  const clearAllSeats = () => {
+    setConfig((c) => ({ ...c, seats: [] }));
+    setSelectedNum(null);
+    toast.success("Semua kursi dihapus");
   };
 
   const reorder = (num: number, dir: -1 | 1) => {
