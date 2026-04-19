@@ -27,6 +27,7 @@ import AdminServices from "./modules/admin/pages/AdminServices";
 import AdminVehicles from "./modules/admin/pages/AdminVehicles";
 import AdminBookings from "./modules/admin/pages/AdminBookings";
 import AdminScan from "./modules/admin/pages/AdminScan";
+import AdminSeatEditor from "./modules/admin/pages/AdminSeatEditor";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/admin/shuttle/vehicles" element={<AdminVehicles />} />
           <Route path="/admin/shuttle/bookings" element={<AdminBookings />} />
           <Route path="/admin/shuttle/scan" element={<AdminScan />} />
+          <Route path="/admin/shuttle/seat-editor" element={<AdminSeatEditor />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
