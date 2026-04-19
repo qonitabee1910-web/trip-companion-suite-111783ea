@@ -49,6 +49,7 @@ const emptyRayon: Rayon = {
   pickupPoints: [],
   color: "primary",
   estimateMin: 60,
+  surcharge: 0,
 };
 
 const AdminRayons = () => {
