@@ -13,6 +13,7 @@ interface SeatMapProps {
 
 export function SeatMap({ vehicle, totalSeats, occupied, selected, maxSelect, onToggle, tier }: SeatMapProps) {
   const layout = getSeatLayout(vehicle, totalSeats, tier);
+  const seatSize = layout.seatSize ?? 11;
 
   return (
     <div className="space-y-3">
@@ -34,7 +35,7 @@ export function SeatMap({ vehicle, totalSeats, occupied, selected, maxSelect, on
           style={{
             left: `${layout.driverSeat.x}%`,
             top: `${layout.driverSeat.y}%`,
-            width: "11%",
+            width: `${seatSize}%`,
             aspectRatio: "1",
           }}
           title="Sopir"
@@ -71,7 +72,7 @@ export function SeatMap({ vehicle, totalSeats, occupied, selected, maxSelect, on
               style={{
                 left: `${seat.x}%`,
                 top: `${seat.y}%`,
-                width: "11%",
+                width: `${seatSize}%`,
                 aspectRatio: "1",
               }}
             >

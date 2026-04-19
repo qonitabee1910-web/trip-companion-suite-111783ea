@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RotateCcw, Copy, Download, ArrowUp, ArrowDown, Save, Eraser, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { DraggableSeat } from "../components/DraggableSeat";
 import {
   LAYOUT_PRESETS,
@@ -25,6 +37,7 @@ import {
   loadLayoutFromStorage,
   clearLayoutFromStorage,
   hasStoredLayout,
+  DEFAULT_SEAT_SIZE,
   type SeatLayoutConfig,
   type SeatPosition,
   type LayoutKey,
@@ -97,8 +110,19 @@ export default function SeatLayoutEditor() {
   };
 
   const removeSeat = (num: number) => {
-    setConfig((c) => ({ ...c, seats: c.seats.filter((s) => s.num !== num) }));
+    setConfig((c) => {
+      const filtered = c.seats.filter((s) => s.num !== num);
+      // Renumber sequentially so nomor selalu 1..N
+      const renum = filtered.map((s, i) => ({ ...s, num: i + 1 }));
+      return { ...c, seats: renum };
+    });
     setSelectedNum(null);
+  };
+
+  const clearAllSeats = () => {
+    setConfig((c) => ({ ...c, seats: [] }));
+    setSelectedNum(null);
+    toast.success("Semua kursi dihapus");
   };
 
   const reorder = (num: number, dir: -1 | 1) => {
@@ -133,6 +157,7 @@ export default function SeatLayoutEditor() {
     return `export const ${layoutKey}_LAYOUT: SeatLayoutConfig = {
   image: ${layoutKey.toLowerCase()}Img,
   aspect: "${config.aspect}",
+  seatSize: ${config.seatSize ?? DEFAULT_SEAT_SIZE},
   driverSeat: { x: ${config.driverSeat.x}, y: ${config.driverSeat.y} },
   seats: [
 ${seatsStr}
@@ -206,6 +231,19 @@ ${seatsStr}
               <Label htmlFor="snap" className="cursor-pointer">Snap to grid (1%)</Label>
               <Switch id="snap" checked={snap} onCheckedChange={setSnap} />
             </div>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <Label>Ukuran kursi</Label>
+                <span className="text-xs font-mono text-muted-foreground">{config.seatSize ?? DEFAULT_SEAT_SIZE}%</span>
+              </div>
+              <Slider
+                min={5}
+                max={18}
+                step={1}
+                value={[config.seatSize ?? DEFAULT_SEAT_SIZE]}
+                onValueChange={(v) => setConfig((c) => ({ ...c, seatSize: v[0] }))}
+              />
+            </div>
             <Separator />
             <div className="grid grid-cols-2 gap-2">
               <Button onClick={addSeat} size="sm" variant="outline"><Plus className="h-4 w-4" />Kursi</Button>
@@ -213,6 +251,36 @@ ${seatsStr}
               <Button onClick={saveLayout} size="sm" className="col-span-2">
                 <Save className="h-4 w-4" />Simpan ke tampilan user
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="col-span-2 text-destructive hover:text-destructive"
+                    disabled={config.seats.length === 0}
+                  >
+                    <XCircle className="h-4 w-4" />Hapus semua kursi
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Hapus semua kursi?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Semua {config.seats.length} kursi pada layout {LAYOUT_LABELS[layoutKey]} akan dihapus.
+                      Driver seat tetap. Anda bisa menambah kursi baru lewat tombol "Kursi".
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={clearAllSeats}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Ya, hapus semua
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               {hasSaved && (
                 <Button onClick={clearSaved} size="sm" variant="ghost" className="col-span-2 text-destructive hover:text-destructive">
                   <Eraser className="h-4 w-4" />Hapus simpanan
@@ -309,6 +377,7 @@ ${seatsStr}
               containerRef={containerRef}
               onMove={updateDriver}
               snap={snap ? 1 : 0}
+              size={config.seatSize ?? DEFAULT_SEAT_SIZE}
             />
             {config.seats.map((s: SeatPosition) => (
               <DraggableSeat
@@ -320,12 +389,14 @@ ${seatsStr}
                 containerRef={containerRef}
                 onMove={(x, y) => updateSeat(s.num, x, y)}
                 onSelect={() => setSelectedNum(s.num)}
+                onDelete={() => removeSeat(s.num)}
                 snap={snap ? 1 : 0}
+                size={config.seatSize ?? DEFAULT_SEAT_SIZE}
               />
             ))}
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Drag tombol untuk memindahkan • Klik untuk seleksi & edit manual
+            Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
           </p>
         </Card>
       </main>
