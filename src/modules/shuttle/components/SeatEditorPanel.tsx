@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { DraggableSeat } from "./DraggableSeat";
+import { SeatEditorLivePreview } from "./SeatEditorLivePreview";
 import {
   LAYOUT_PRESETS,
   LAYOUT_LABELS,
@@ -442,8 +443,9 @@ ${seatsStr}
         </Card>
       </div>
 
-      {/* Canvas */}
-      <Card className="p-4">
+      {/* Canvas + Live preview */}
+      <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
+        <Card className="p-4">
         <div
           ref={containerRef}
           className="relative mx-auto w-full max-w-[400px] rounded-xl bg-muted/30"
@@ -482,10 +484,15 @@ ${seatsStr}
             />
           ))}
         </div>
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
-        </p>
-      </Card>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Drag untuk memindahkan • Klik untuk seleksi • Tombol × pada kursi terpilih untuk hapus
+          </p>
+        </Card>
+
+        <Card className="p-4 xl:sticky xl:top-20 xl:self-start">
+          <SeatEditorLivePreview config={config} />
+        </Card>
+      </div>
     </div>
   );
 }
