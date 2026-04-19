@@ -129,3 +129,20 @@
   font-family: inherit;
   z-index: 0;
 }
+
+/* Print: only show e-ticket area */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #eticket-print, #eticket-print * {
+    visibility: visible;
+  }
+  #eticket-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+  }
+}

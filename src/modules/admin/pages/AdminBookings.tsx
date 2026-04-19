@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Ticket, Trash2, RotateCcw } from "lucide-react";
+import { Ticket, Trash2, RotateCcw, Eye } from "lucide-react";
 import {
   getBookings,
   updateBookingStatus,
@@ -41,6 +41,7 @@ import {
 } from "@/modules/shuttle/data/repository";
 import type { BookingStatus, ShuttleBooking } from "@/modules/shuttle/types/booking";
 import { useToast } from "@/hooks/use-toast";
+import { BookingDetailDrawer } from "../components/BookingDetailDrawer";
 
 const statusColor: Record<BookingStatus, string> = {
   confirmed: "bg-primary/10 text-primary border-primary/30",
@@ -53,6 +54,7 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState<ShuttleBooking[]>(getBookings());
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("");
+  const [detailBooking, setDetailBooking] = useState<ShuttleBooking | null>(null);
 
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
@@ -163,7 +165,11 @@ const AdminBookings = () => {
                 {filtered.map((b) => {
                   const d = parseISO(b.date);
                   return (
-                    <TableRow key={b.id}>
+                    <TableRow
+                      key={b.id}
+                      className="cursor-pointer hover:bg-muted/40"
+                      onClick={() => setDetailBooking(b)}
+                    >
                       <TableCell className="font-mono text-xs">{b.id}</TableCell>
                       <TableCell className="text-xs">
                         <div className="font-medium">{b.customerName}</div>
@@ -186,25 +192,34 @@ const AdminBookings = () => {
                           {b.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Select value={b.status} onValueChange={(v) => handleStatus(b.id, v as BookingStatus)}>
-                          <SelectTrigger className="w-[120px] h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="done">Done</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(b.id)}
-                          className="ml-1"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDetailBooking(b)}
+                            title="Lihat detail"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Select value={b.status} onValueChange={(v) => handleStatus(b.id, v as BookingStatus)}>
+                            <SelectTrigger className="w-[120px] h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="done">Done</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(b.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -214,6 +229,12 @@ const AdminBookings = () => {
           </div>
         </Card>
       </div>
+
+      <BookingDetailDrawer
+        booking={detailBooking}
+        open={!!detailBooking}
+        onOpenChange={(o) => !o && setDetailBooking(null)}
+      />
     </AdminLayout>
   );
 };
