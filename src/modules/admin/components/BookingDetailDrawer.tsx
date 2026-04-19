@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Printer, User, Phone, MapPin, Calendar, Clock, Ticket, Armchair } from "lucide-react";
+import { Printer, User, Phone, MapPin, Calendar, Clock, Ticket, Armchair, MessageCircle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { SeatMap } from "@/modules/shuttle/components/SeatMap";
 import type { ShuttleBooking, BookingStatus } from "@/modules/shuttle/types/booking";
@@ -44,6 +44,31 @@ export function BookingDetailDrawer({ booking, open, onOpenChange }: Props) {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSendWhatsApp = () => {
+    const phone = booking.customerPhone.replace(/\D/g, "").replace(/^0/, "62");
+    const lines = [
+      `*E-TICKET SHUTTLE* 🚐`,
+      `ID: *${booking.id}*`,
+      ``,
+      `Halo ${booking.customerName}, berikut e-ticket Anda:`,
+      ``,
+      `📍 *Rayon:* ${booking.rayonName}`,
+      `📌 *Jemput:* ${booking.pickup}`,
+      `📅 *Tanggal:* ${dateLabel}`,
+      `⏰ *Berangkat:* ${booking.time}`,
+      `🚐 *Kendaraan:* ${booking.vehicleLabel}`,
+      `⭐ *Service:* ${booking.serviceLabel}`,
+      `💺 *Kursi:* ${booking.seats.join(", ")} (${booking.pax} pax)`,
+      `💰 *Total:* Rp${booking.totalPrice.toLocaleString("id-ID")}`,
+      ``,
+      `Tunjukkan kode booking *${booking.id}* ke petugas saat penjemputan.`,
+      ``,
+      `Lihat tiket: ${window.location.origin}/admin/shuttle/bookings`,
+    ];
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(lines.join("\n"))}`;
+    window.open(url, "_blank", "noopener");
   };
 
   return (
@@ -183,11 +208,17 @@ export function BookingDetailDrawer({ booking, open, onOpenChange }: Props) {
         </div>
 
         {/* Actions */}
-        <div className="mt-6 flex gap-2 print:hidden">
-          <Button onClick={handlePrint} className="flex-1">
-            <Printer className="h-4 w-4" /> Cetak E-Ticket
+        <div className="mt-6 flex flex-wrap gap-2 print:hidden">
+          <Button
+            onClick={handleSendWhatsApp}
+            className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
+          >
+            <MessageCircle className="h-4 w-4" /> Kirim via WhatsApp
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button onClick={handlePrint} variant="outline" className="flex-1">
+            <Printer className="h-4 w-4" /> Cetak
+          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Tutup
           </Button>
         </div>
