@@ -62,20 +62,20 @@ export default function SeatLayoutEditor() {
   };
 
   const saveLayout = () => {
-    const ok = saveLayoutToStorage(vehicleKey, config, !!customImage);
+    const ok = saveLayoutToStorage(layoutKey, config, !!customImage);
     if (ok) {
       setHasSaved(true);
-      toast.success(`Layout ${vehicleKey} disimpan — tampilan user diperbarui`);
+      toast.success(`Layout ${LAYOUT_LABELS[layoutKey]} disimpan — tampilan user diperbarui`);
     } else {
       toast.error("Gagal menyimpan (storage penuh?)");
     }
   };
 
   const clearSaved = () => {
-    clearLayoutFromStorage(vehicleKey);
+    clearLayoutFromStorage(layoutKey);
     setHasSaved(false);
     resetToPreset();
-    toast.success(`Simpanan ${vehicleKey} dihapus, kembali ke default`);
+    toast.success(`Simpanan ${LAYOUT_LABELS[layoutKey]} dihapus, kembali ke default`);
   };
 
   const updateSeat = (num: number, x: number, y: number) => {
@@ -130,15 +130,15 @@ export default function SeatLayoutEditor() {
     const seatsStr = config.seats
       .map((s) => `    { num: ${s.num}, x: ${s.x}, y: ${s.y} },`)
       .join("\n");
-    return `export const ${vehicleKey}_LAYOUT: SeatLayoutConfig = {
-  image: ${vehicleKey.toLowerCase()}Img,
+    return `export const ${layoutKey}_LAYOUT: SeatLayoutConfig = {
+  image: ${layoutKey.toLowerCase()}Img,
   aspect: "${config.aspect}",
   driverSeat: { x: ${config.driverSeat.x}, y: ${config.driverSeat.y} },
   seats: [
 ${seatsStr}
   ],
 };`;
-  }, [config, vehicleKey]);
+  }, [config, layoutKey]);
 
   const copyExport = async () => {
     await navigator.clipboard.writeText(exportSnippet);
@@ -150,7 +150,7 @@ ${seatsStr}
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${vehicleKey.toLowerCase()}-layout.ts`;
+    a.download = `${layoutKey.toLowerCase()}-layout.ts`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -179,13 +179,13 @@ ${seatsStr}
         <div className="space-y-4">
           <Card className="space-y-3 p-4">
             <div>
-              <Label>Kendaraan</Label>
-              <Select value={vehicleKey} onValueChange={(v) => loadPreset(v as VehicleKey)}>
+              <Label>Varian Kendaraan & Service</Label>
+              <Select value={layoutKey} onValueChange={(v) => loadPreset(v as LayoutKey)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="HIACE">HiAce</SelectItem>
-                  <SelectItem value="ELF">Elf</SelectItem>
-                  <SelectItem value="PREMIO">Premio</SelectItem>
+                  {LAYOUT_KEYS.map((k) => (
+                    <SelectItem key={k} value={k}>{LAYOUT_LABELS[k]}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
