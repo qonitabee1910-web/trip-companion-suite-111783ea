@@ -1,4 +1,4 @@
-import { LayoutDashboard, MapPin, Sparkles, Bus, Ticket, Armchair, ExternalLink, ScanLine } from "lucide-react";
+import { LayoutDashboard, MapPin, Sparkles, Bus, Ticket, Armchair, ScanLine } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -19,6 +19,7 @@ const items = [
   { title: "Kendaraan", url: "/admin/shuttle/vehicles", icon: Bus },
   { title: "Booking", url: "/admin/shuttle/bookings", icon: Ticket },
   { title: "Scan Tiket", url: "/admin/shuttle/scan", icon: ScanLine },
+  { title: "Seat Layout", url: "/admin/shuttle/seat-editor", icon: Armchair },
 ];
 
 export function AdminSidebar() {
@@ -51,30 +52,6 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Tools</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a
-                    href="/shuttle/seat-editor"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:bg-muted/50"
-                  >
-                    <Armchair className="h-4 w-4" />
-                    {!collapsed && (
-                      <span className="flex items-center gap-1">
-                        Seat Layout <ExternalLink className="h-3 w-3" />
-                      </span>
-                    )}
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
