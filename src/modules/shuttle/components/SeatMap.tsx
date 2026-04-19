@@ -1,5 +1,5 @@
 import { User } from "lucide-react";
-import { getSeatLayout } from "../data/seatLayouts";
+import { getSeatLayout, type ServiceTier } from "../data/seatLayouts";
 
 interface SeatMapProps {
   vehicle: string;
@@ -8,10 +8,11 @@ interface SeatMapProps {
   selected: number[];
   maxSelect: number;
   onToggle: (n: number) => void;
+  tier?: ServiceTier;
 }
 
-export function SeatMap({ vehicle, totalSeats, occupied, selected, maxSelect, onToggle }: SeatMapProps) {
-  const layout = getSeatLayout(vehicle, totalSeats);
+export function SeatMap({ vehicle, totalSeats, occupied, selected, maxSelect, onToggle, tier }: SeatMapProps) {
+  const layout = getSeatLayout(vehicle, totalSeats, tier);
 
   return (
     <div className="space-y-3">
