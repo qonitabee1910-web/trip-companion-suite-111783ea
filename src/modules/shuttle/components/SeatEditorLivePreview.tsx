@@ -138,57 +138,60 @@ function PreviewSeats({ config, seatSize, occupiedSet, selected, maxSelect, onTo
           </svg>
         </div>
 
-        {/* Passenger seats */}
-        {config.seats.map((seat) => {
-          const isOccupied = occupiedSet.has(seat.num);
-          const isSelected = selected.includes(seat.num);
-          const disabled = isOccupied || (!isSelected && selected.length >= maxSelect);
-          return (
-            <button
-              key={seat.num}
-              type="button"
-              onClick={() => toggle(seat.num)}
-              disabled={isOccupied}
-              aria-pressed={isSelected}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-[10px] font-bold border-2 transition-all ${
-                isOccupied
-                  ? "bg-muted text-muted-foreground border-muted cursor-not-allowed"
-                  : isSelected
-                    ? "bg-primary text-primary-foreground border-primary scale-110 shadow-md"
-                    : disabled
-                      ? "bg-card text-muted-foreground border-border cursor-not-allowed opacity-60"
-                      : "bg-card text-foreground border-primary/40 hover:border-primary hover:bg-primary/10"
-              }`}
-              style={{
-                left: `${seat.x}%`,
-                top: `${seat.y}%`,
-                width: `${seatSize}%`,
-                aspectRatio: "1",
-              }}
-            >
-              {isOccupied ? <User className="h-3 w-3" /> : seat.num}
-            </button>
-          );
-        })}
-      </div>
+      {/* Passenger seats */}
+      {config.seats.map((seat) => {
+        const isOccupied = occupiedSet.has(seat.num);
+        const isSelected = selected.includes(seat.num);
+        const disabled = isOccupied || (!isSelected && selected.length >= maxSelect);
+        return (
+          <button
+            key={seat.num}
+            type="button"
+            onClick={() => onToggle(seat.num)}
+            disabled={isOccupied}
+            aria-pressed={isSelected}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-md text-[10px] font-bold border-2 transition-all ${
+              isOccupied
+                ? "bg-muted text-muted-foreground border-muted cursor-not-allowed"
+                : isSelected
+                  ? "bg-primary text-primary-foreground border-primary scale-110 shadow-md"
+                  : disabled
+                    ? "bg-card text-muted-foreground border-border cursor-not-allowed opacity-60"
+                    : "bg-card text-foreground border-primary/40 hover:border-primary hover:bg-primary/10"
+            }`}
+            style={{
+              left: `${seat.x}%`,
+              top: `${seat.y}%`,
+              width: `${seatSize}%`,
+              aspectRatio: "1",
+            }}
+          >
+            {isOccupied ? <User className="h-3 w-3" /> : seat.num}
+          </button>
+        );
+      })}
+    </>
+  );
+}
 
-      <div className="flex flex-wrap justify-center gap-2 text-[10px]">
-        <div className="flex items-center gap-1">
-          <div className="h-2.5 w-2.5 rounded border-2 border-primary/40 bg-card" />
-          <span>Tersedia</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2.5 w-2.5 rounded border-2 border-primary bg-primary" />
-          <span>Dipilih</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2.5 w-2.5 rounded bg-muted border-2 border-muted" />
-          <span>Terisi (mock)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2.5 w-2.5 rounded-full border-2 border-warning bg-warning/20" />
-          <span>Sopir</span>
-        </div>
+function Legend() {
+  return (
+    <div className="flex flex-wrap justify-center gap-2 text-[10px]">
+      <div className="flex items-center gap-1">
+        <div className="h-2.5 w-2.5 rounded border-2 border-primary/40 bg-card" />
+        <span>Tersedia</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="h-2.5 w-2.5 rounded border-2 border-primary bg-primary" />
+        <span>Dipilih</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="h-2.5 w-2.5 rounded bg-muted border-2 border-muted" />
+        <span>Terisi (mock)</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="h-2.5 w-2.5 rounded-full border-2 border-warning bg-warning/20" />
+        <span>Sopir</span>
       </div>
     </div>
   );
