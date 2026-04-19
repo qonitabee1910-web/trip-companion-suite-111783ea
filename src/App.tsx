@@ -28,6 +28,8 @@ import AdminVehicles from "./modules/admin/pages/AdminVehicles";
 import AdminBookings from "./modules/admin/pages/AdminBookings";
 import AdminScan from "./modules/admin/pages/AdminScan";
 import AdminSeatEditor from "./modules/admin/pages/AdminSeatEditor";
+import AdminShuttleContent from "./modules/admin/pages/AdminShuttleContent";
+import AdminInventory from "./modules/admin/pages/AdminInventory";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,8 @@ const App = () => (
           <Route path="/admin/shuttle/bookings" element={<AdminBookings />} />
           <Route path="/admin/shuttle/scan" element={<AdminScan />} />
           <Route path="/admin/shuttle/seat-editor" element={<AdminSeatEditor />} />
+          <Route path="/admin/shuttle/content" element={<AdminShuttleContent />} />
+          <Route path="/admin/shuttle/inventory" element={<AdminInventory />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
