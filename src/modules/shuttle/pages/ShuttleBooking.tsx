@@ -22,6 +22,12 @@ const ShuttleBooking = () => {
   const pickup = params.get("pickup") || rayon?.pickupPoints[0] || "";
   const time = params.get("time") || "06:00";
   const pax = Number(params.get("pax") || 1);
+  const dateStr = params.get("date") || "";
+  const parsedDate = dateStr ? parseISO(dateStr) : null;
+  const dateLabel =
+    parsedDate && isValid(parsedDate)
+      ? format(parsedDate, "EEE, d MMM yyyy", { locale: localeId })
+      : "-";
 
   const totalSeats = vehicle.totalSeats;
   const seatsLeft = mockSeatsAvailable(vehicle.id, service.tier, totalSeats);
