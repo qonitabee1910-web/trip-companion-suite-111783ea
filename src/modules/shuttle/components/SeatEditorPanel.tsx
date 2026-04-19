@@ -48,7 +48,7 @@ import {
   getVehicleTypesAll,
   getServicesAll,
 } from "../data/repository";
-import { calcPrice } from "../data/services";
+import { calcPrice, getTotalSeatsForVehicle } from "../data/services";
 
 interface Props {
   initialKey?: LayoutKey;
@@ -109,7 +109,8 @@ export function SeatEditorPanel({ initialKey, initialVehicle, initialTier }: Pro
   const vehicle = vehicles.find((v) => v.id === vehicleId);
   const service = services.find((s) => s.tier === tier);
   const finalPrice = vehicle && service ? calcPrice(vehicle, service) : 0;
-  const capacityMismatch = !!vehicle && config.seats.length !== vehicle.totalSeats;
+  const vehicleCapacity = vehicle ? getTotalSeatsForVehicle(vehicle.id) : 0;
+  const capacityMismatch = vehicleCapacity > 0 && config.seats.length !== vehicleCapacity;
 
   const resetToPreset = () => {
     const p = LAYOUT_PRESETS[layoutKey];
@@ -137,7 +138,11 @@ export function SeatEditorPanel({ initialKey, initialVehicle, initialTier }: Pro
 
   const syncToCapacity = () => {
     if (!vehicle) return;
-    const target = vehicle.totalSeats;
+    const target = getTotalSeatsForVehicle(vehicle.id);
+    if (target <= 0) {
+      toast.error("Tidak dapat sinkronkan — kapasitas tidak valid");
+      return;
+    }
     setConfig((c) => {
       let seats = [...c.seats];
       if (seats.length > target) {
@@ -279,7 +284,7 @@ ${seatsStr}
             </div>
             {vehicle && service && (
               <div className="text-muted-foreground">
-                Kapasitas: <span className="font-medium text-foreground">{vehicle.totalSeats}</span> kursi •
+                Kapasitas: <span className="font-medium text-foreground">{vehicleCapacity}</span> kursi •
                 Harga: <span className="font-medium text-foreground">Rp{finalPrice.toLocaleString("id-ID")}</span>
               </div>
             )}
@@ -288,17 +293,17 @@ ${seatsStr}
             </div>
           </div>
 
-          {capacityMismatch && vehicle && (
+          {capacityMismatch && vehicleCapacity > 0 && (
             <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 space-y-2">
               <div className="flex items-start gap-2 text-xs">
                 <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>
                   Layout punya <b>{config.seats.length}</b> kursi tapi kapasitas kendaraan
-                  <b> {vehicle.totalSeats}</b>. Sinkronkan agar tampilan user konsisten.
+                  <b> {vehicleCapacity}</b>. Sinkronkan agar tampilan user konsisten.
                 </span>
               </div>
               <Button size="sm" variant="outline" className="w-full" onClick={syncToCapacity}>
-                <Wand2 className="h-4 w-4" /> Sinkronkan ke {vehicle.totalSeats} kursi
+                <Wand2 className="h-4 w-4" /> Sinkronkan ke {vehicleCapacity} kursi
               </Button>
             </div>
           )}
